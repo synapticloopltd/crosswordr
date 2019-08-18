@@ -63,7 +63,7 @@ configurations.all {
 
 jar {
 	manifest {
-		attributes("Main-Class": "synapticloop.crosswordr.Main", "Implementation-Version": version)
+		attributes("Main-Class": "synapticloop.crosswordr.CrosswordrMain", "Implementation-Version": version)
 	}
 }
 

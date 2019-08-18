@@ -1,23 +1,21 @@
 package synapticloop.crosswordr;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringReader;
 import java.nio.charset.Charset;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.transform.Result;
-import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -36,9 +34,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import synapticloop.crosswordr.crossword.Crossword;
+import synapticloop.crosswordr.exception.CrosswordrException;
+import synapticloop.crosswordr.utils.Helper;
 
 public class CrosswordrMain {
-	private static final String CROSSWORD_TYPE_DATE = "date";
+	private static final String CROSSWORD_TYPE_DATE_DEFAULT = "date";
+	private static final String CROSSWORD_TYPE_NUMBER = "number";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(CrosswordrMain.class);
 
@@ -56,20 +57,28 @@ public class CrosswordrMain {
 	private static final String JSON_KEY_TRANSLATE_DATE = "translateDate";
 	private static final String JSON_KEY_TRANSLATE_NUMBER = "translateNumber";
 
-	public static void main(String[] args) throws IOException, FOPException, TransformerException {
-		Date currentDate = Calendar.getInstance().getTime();
+	public static void main(String[] args) throws IOException, FOPException, TransformerException, ParseException {
+		Date currentDate = null;
+		if(args.length != 0) {
+			String argZero = args[0];
+			LOGGER.info("Attempting to parse '{}' as a date.", argZero);
+		} else {
+			LOGGER.info("No date passed through the command line, using today's date.");
+		}
+
+		currentDate = Calendar.getInstance().getTime();
 
 		String crosswordrJson = FileUtils.readFileToString(new File(CROSSWORDR_JSON), Charset.defaultCharset());
 		JSONObject crosswordrJsonObject = new JSONObject(crosswordrJson);
 		Iterator<Object> crosswordsArrayIterator = crosswordrJsonObject.getJSONArray(JSON_KEY_CROSSWORDS).iterator();
 		while (crosswordsArrayIterator.hasNext()) {
-
+			Integer crosswordNumber = null;
 			JSONObject crosswordObject = (JSONObject) crosswordsArrayIterator.next();
 
-			String crosswordType = crosswordObject.optString(JSON_KEY_TYPE, CROSSWORD_TYPE_DATE);
-			if(crosswordType.equalsIgnoreCase(CROSSWORD_TYPE_DATE)) {
+			String crosswordType = crosswordObject.optString(JSON_KEY_TYPE, CROSSWORD_TYPE_DATE_DEFAULT);
+			String urlFormat = crosswordObject.getString(JSON_KEY_URL_FORMAT);
 
-				String urlFormat = crosswordObject.getString(JSON_KEY_URL_FORMAT);
+			if(crosswordType.equalsIgnoreCase(CROSSWORD_TYPE_DATE_DEFAULT)) {
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(urlFormat);
 				String formattedUrl = simpleDateFormat.format(currentDate);
 
@@ -83,25 +92,49 @@ public class CrosswordrMain {
 								crosswordType
 								)
 						);
-			} else {
+			} else if(crosswordType.equalsIgnoreCase(CROSSWORD_TYPE_NUMBER)){
 				// add a numeric format now
-				LOGGER.info("Ignoring crossword...");
+				String translateDate = crosswordObject.getString(JSON_KEY_TRANSLATE_DATE);
+				String translateNumber = crosswordObject.getString(JSON_KEY_TRANSLATE_NUMBER);
+				Date dateTranslate = new SimpleDateFormat("yyyyMMdd").parse(translateDate);
+
+				int numDaysDifference = (int)((currentDate.getTime() - dateTranslate.getTime()) / (1000 * 60 * 60 * 24) );
+				int parseInt = Integer.parseInt(translateNumber);
+
+				crosswordNumber = parseInt + numDaysDifference;
+				String formattedUrl = String.format(urlFormat, crosswordNumber);
+				crosswords.add(
+						new Crossword(
+								crosswordObject.getString(JSON_KEY_NAME), 
+								crosswordObject.getString(JSON_KEY_FILE_NAME), 
+								formattedUrl, 
+								crosswordObject.getString(JSON_KEY_EXTRACTOR),
+								crosswordObject.getString(JSON_KEY_XSL),
+								crosswordType,
+								translateDate,
+								translateNumber
+								)
+						);
+			} else {
+				LOGGER.error("Unknown crossword type of '{}'", crosswordType);
 			}
 		}
 
 		for (Crossword crossword : crosswords) {
-			if(crossword.getType().equalsIgnoreCase(CROSSWORD_TYPE_DATE)) {
-				// do we have the file yet
-				String xmlFileName = "./output/xml/" + crossword.getFileName()  + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".xml";
-				File xmlFile = new File(xmlFileName);
-				if(!xmlFile.exists()) {
-					LOGGER.info("Downloading file '{}'", xmlFileName);
+			String xmlFileName = "./output/xml/" + crossword.getFileName()  + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".xml";
+			File xmlFile = new File(xmlFileName);
+			if(!xmlFile.exists()) {
+				LOGGER.info("Downloading file '{}'", xmlFileName);
+				try {
 					FileUtils.writeStringToFile(xmlFile, crossword.getData(), Charset.defaultCharset());
-				} else {
-					LOGGER.info("File exists, not downloading file '{}'", xmlFileName);
+				} catch (CrosswordrException ex) {
+					LOGGER.error(ex.getMessage(), ex);
+					continue;
 				}
-				convertToPDF(xmlFile, crossword, currentDate);
+			} else {
+				LOGGER.info("File exists, not downloading file '{}'", xmlFileName);
 			}
+			convertToPDF(xmlFile, crossword, currentDate);
 		}
 	}
 
@@ -135,6 +168,9 @@ public class CrosswordrMain {
 
 			Transformer transformer = factory.newTransformer(new StreamSource(resourceAsStream));
 			transformer.setParameter("crosswordName", crossword.getName());
+			//			if(crossword.getType().compareTo(CROSSWORD_TYPE_NUMBER)) {
+			//				transformer.setParameter("crosswordIdentifier", "#" + crossword.getTranslateNumber());
+			//			}
 			transformer.setParameter("crosswordIdentifier", new SimpleDateFormat("dd MMMM yyyy").format(date));
 
 			// Resulting SAX events (the generated FO) must be piped through to FOP

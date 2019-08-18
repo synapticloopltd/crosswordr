@@ -33,10 +33,10 @@
 			"file_name": "the_globe_and_mail_cryptic_crossword_",
 			"url_format": "https://xwords.net/xwordjs/files/html5/%dcrp.js",
 			"extractor": "synapticloop.crosswordr.extractor.JavascriptExtractor",
-			"xsl": "crossword-compiler-landscape.xsl",
+			"xsl": "crossword-compiler-applet.xsl",
 			"type": "number",
-			"translateDate": "20190816",
-			"translateNumber": "16144"
+			"translateDate": "20190814",
+			"translateNumber": "16142"
 		}
 	]
 }

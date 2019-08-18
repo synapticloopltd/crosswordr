@@ -30,7 +30,8 @@
 
 <fo:page-sequence master-reference="A4-portrait">
 	<fo:flow flow-name="xsl-region-body">
-		<fo:block margin-bottom="10mm">
+
+		<fo:block margin-bottom="8mm" border-bottom="solid">
 			<fo:inline font-size="18pt" font-family="serif"><xsl:value-of select="$crosswordName" /> - </fo:inline>
 			<fo:inline font-size="10pt" font-family="serif"><xsl:value-of select="$crosswordIdentifier" /></fo:inline>
 		</fo:block>
@@ -94,6 +95,11 @@
 
 <fo:page-sequence master-reference="A4-portrait">
 	<fo:flow flow-name="xsl-region-body">
+
+		<fo:block margin-bottom="8mm" border-bottom="solid">
+			<fo:inline font-size="18pt" font-family="serif"><xsl:value-of select="$crosswordName" /> - </fo:inline>
+			<fo:inline font-size="10pt" font-family="serif"><xsl:value-of select="$crosswordIdentifier" /></fo:inline>
+		</fo:block>
 
 		<xsl:variable name="width" select="/cc:crossword-compiler/rp:rectangular-puzzle/rp:crossword/rp:grid/@width" />
 		<xsl:variable name="height" select="/cc:crossword-compiler/rp:rectangular-puzzle/rp:crossword/rp:grid/@height" />
