@@ -25,6 +25,7 @@ public class Crossword {
 	private String type = "date";
 	private String translateDate = null;
 	private String translateNumber = null;
+	private Integer crosswordNumber = null;
 
 	public Crossword(String name, 
 			String fileName, 
@@ -103,6 +104,13 @@ public class Crossword {
 	}
 
 	public Integer getTranslateNumber() { 
-		return(Integer.valueOf(this.translateNumber)); 
+		if(null != this.translateNumber) {
+			return(Integer.valueOf(this.translateNumber));
+		}
+		return(null);
 	}
+
+	public Integer getCrosswordNumber() { return crosswordNumber; }
+	public void setCrosswordNumber(Integer crosswordNumber) { this.crosswordNumber = crosswordNumber; }
+
 }

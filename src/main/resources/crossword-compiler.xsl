@@ -8,6 +8,7 @@
 	<xsl:output method="xml" indent="yes"/>
 	<xsl:param name="crosswordName" />
 	<xsl:param name="crosswordIdentifier" />
+	<xsl:param name="crosswordNumber" />
 
 <xsl:template match="/">
 <fo:root>
@@ -32,7 +33,12 @@
 	<fo:flow flow-name="xsl-region-body">
 
 		<fo:block margin-bottom="8mm" border-bottom="solid">
-			<fo:inline font-size="18pt" font-family="serif"><xsl:value-of select="$crosswordName" /> - </fo:inline>
+			<fo:inline font-size="18pt" font-weight="bold" font-family="serif">
+				<xsl:value-of select="$crosswordName" /> 
+				<xsl:if test="$crosswordNumber != -1">
+					(#<xsl:value-of select="$crosswordNumber" />)
+				</xsl:if> - 
+			</fo:inline>
 			<fo:inline font-size="10pt" font-family="serif"><xsl:value-of select="$crosswordIdentifier" /></fo:inline>
 		</fo:block>
 
@@ -97,7 +103,12 @@
 	<fo:flow flow-name="xsl-region-body">
 
 		<fo:block margin-bottom="8mm" border-bottom="solid">
-			<fo:inline font-size="18pt" font-family="serif"><xsl:value-of select="$crosswordName" /> - </fo:inline>
+			<fo:inline font-size="18pt" font-weight="bold" font-family="serif">
+				<xsl:value-of select="$crosswordName" /> 
+				<xsl:if test="$crosswordNumber != -1">
+					(#<xsl:value-of select="$crosswordNumber" />)
+				</xsl:if> - 
+			</fo:inline>
 			<fo:inline font-size="10pt" font-family="serif"><xsl:value-of select="$crosswordIdentifier" /></fo:inline>
 		</fo:block>
 

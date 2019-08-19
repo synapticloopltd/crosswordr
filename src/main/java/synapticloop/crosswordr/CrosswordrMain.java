@@ -11,9 +11,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
+import java.util.Set;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
@@ -35,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import synapticloop.crosswordr.crossword.Crossword;
 import synapticloop.crosswordr.exception.CrosswordrException;
-import synapticloop.crosswordr.utils.Helper;
 
 public class CrosswordrMain {
 	private static final String CROSSWORD_TYPE_DATE_DEFAULT = "date";
@@ -62,11 +63,18 @@ public class CrosswordrMain {
 		if(args.length != 0) {
 			String argZero = args[0];
 			LOGGER.info("Attempting to parse '{}' as a date.", argZero);
+			try {
+				currentDate = new SimpleDateFormat("yyyyMMdd").parse(argZero);
+			} catch(ParseException ex) {
+				LOGGER.error("Exception: {}. Exiting...", ex.getMessage());
+				System.exit(-1);
+			}
+
 		} else {
 			LOGGER.info("No date passed through the command line, using today's date.");
+			currentDate = Calendar.getInstance().getTime();
 		}
 
-		currentDate = Calendar.getInstance().getTime();
 
 		String crosswordrJson = FileUtils.readFileToString(new File(CROSSWORDR_JSON), Charset.defaultCharset());
 		JSONObject crosswordrJsonObject = new JSONObject(crosswordrJson);
@@ -103,21 +111,40 @@ public class CrosswordrMain {
 
 				crosswordNumber = parseInt + numDaysDifference;
 				String formattedUrl = String.format(urlFormat, crosswordNumber);
+				Crossword crossword = new Crossword(
+						crosswordObject.getString(JSON_KEY_NAME), 
+						crosswordObject.getString(JSON_KEY_FILE_NAME), 
+						formattedUrl, 
+						crosswordObject.getString(JSON_KEY_EXTRACTOR),
+						crosswordObject.getString(JSON_KEY_XSL),
+						crosswordType,
+						translateDate,
+						translateNumber
+						);
+				crossword.setCrosswordNumber(crosswordNumber);
 				crosswords.add(
-						new Crossword(
-								crosswordObject.getString(JSON_KEY_NAME), 
-								crosswordObject.getString(JSON_KEY_FILE_NAME), 
-								formattedUrl, 
-								crosswordObject.getString(JSON_KEY_EXTRACTOR),
-								crosswordObject.getString(JSON_KEY_XSL),
-								crosswordType,
-								translateDate,
-								translateNumber
-								)
+						crossword
 						);
 			} else {
 				LOGGER.error("Unknown crossword type of '{}'", crosswordType);
 			}
+		}
+
+		// check to see whether we have a duplicate URL
+		boolean hasDuplicate = false;
+		Set<String> urls = new HashSet<String>();
+		for (Crossword crossword : crosswords) {
+			String formattedUrl = crossword.getFormattedUrl();
+			if(urls.contains(formattedUrl)) {
+				LOGGER.error("Crossword already contains url '{}'", formattedUrl);
+				hasDuplicate = true;
+			}
+			urls.add(formattedUrl);
+		}
+
+		if(hasDuplicate) {
+			LOGGER.error("Found duplicate urls for crosswords, exiting...");
+			System.exit(-1);
 		}
 
 		for (Crossword crossword : crosswords) {
@@ -134,11 +161,11 @@ public class CrosswordrMain {
 			} else {
 				LOGGER.info("File exists, not downloading file '{}'", xmlFileName);
 			}
-			convertToPDF(xmlFile, crossword, currentDate);
+			convertToPDF(xmlFile, crossword, currentDate, crossword.getCrosswordNumber());
 		}
 	}
 
-	public static void convertToPDF(File xmlFile, Crossword crossword, Date date) {
+	public static void convertToPDF(File xmlFile, Crossword crossword, Date date, Integer number) {
 		String pdfFile = "./output/pdf/" + crossword.getFileName() + new SimpleDateFormat("yyyy-MM-dd").format(date) + ".pdf";
 
 		LOGGER.info("Converting file '{}' to '{}', with xsl '{}'", xmlFile.getName(), pdfFile, crossword.getXsl());
@@ -172,6 +199,11 @@ public class CrosswordrMain {
 			//				transformer.setParameter("crosswordIdentifier", "#" + crossword.getTranslateNumber());
 			//			}
 			transformer.setParameter("crosswordIdentifier", new SimpleDateFormat("dd MMMM yyyy").format(date));
+			if(null != number) {
+				transformer.setParameter("crosswordNumber", number);
+			} else {
+				transformer.setParameter("crosswordNumber", -1);
+			}
 
 			// Resulting SAX events (the generated FO) must be piped through to FOP
 			Result res = new SAXResult(fop.getDefaultHandler());

@@ -37,6 +37,14 @@
 			"type": "number",
 			"translateDate": "20190814",
 			"translateNumber": "16142"
+		},
+		{
+			"name": "The Herald Sun Cryptic Crossword",
+			"file_name": "the_herald_sun_cryptic_crossword_",
+			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/bestforpuzzles-ftp/dailycryptic//daily-cryptic-'yyMMdd'.xml'",
+			"extractor": "synapticloop.crosswordr.extractor.PassthroughExtractor",
+			"xsl": "crossword-compiler.xsl",
+			"type": "date"
 		}
 	]
 }

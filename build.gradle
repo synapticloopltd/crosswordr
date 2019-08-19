@@ -1,5 +1,6 @@
 plugins {
 	id 'java'
+	id 'application'
 	id 'eclipse'
 	id "maven"
 	id "maven-publish"
@@ -60,6 +61,7 @@ configurations.all {
 }
 
 
+mainClassName = "synapticloop.crosswordr.CrosswordrMain"
 
 jar {
 	manifest {
