@@ -5,7 +5,7 @@
 			"file_name": "evening_standard_cryptic_crossword_",
 			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/evening-standard/daily-crossword/cryp_'yyMMdd'.xml'",
 			"extractor": "synapticloop.crosswordr.extractor.PassthroughExtractor",
-			"xsl": "crossword-compiler.xsl"
+			"xsl": "crossword-compiler-landscape.xsl"
 		},
 		{
 			"name": "Trinity Mirror Cryptic Crossword",
@@ -13,13 +13,6 @@
 			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/trinity-mirror-co-uk/mirror_crossword_feeds/cryptic_crossword/mir_2s_cryptic_'yyyyMMdd'.xml'",
 			"extractor": "synapticloop.crosswordr.extractor.PassthroughExtractor",
 			"xsl": "crossword-compiler.xsl"
-		},
-		{
-			"name": "Simple Daily Puzzles Easy Cryptic",
-			"file_name": "simple_daily_puzzles_easy_cryptic_",
-			"url_format": "'http://simplydailypuzzles.com/daily-cryptic/puzzles/'yyyy-MM'/dc1-'yyyy-MM-dd'.js'",
-			"extractor": "synapticloop.crosswordr.extractor.JavascriptExtractor",
-			"xsl": "crossword-compiler-applet.xsl"
 		},
 		{
 			"name": "The Independent's Cryptic Crossword",
