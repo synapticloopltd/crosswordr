@@ -162,6 +162,11 @@ public class CrosswordrMain {
 		mergeFiles();
 	}
 
+	/**
+	 * Write out the XML file into the location
+	 * 
+	 * @throws IOException if there was an error writing the file
+	 */
 	private static void writeXmlFilesAndMerge() throws IOException {
 		for (Crossword crossword : crosswords) {
 			String xmlFileName = "./output/xml/" + crossword.getFileName()  + new SimpleDateFormat("yyyy-MM-dd").format(currentDate ) + ".xml";
@@ -181,6 +186,13 @@ public class CrosswordrMain {
 		}
 	}
 
+	/**
+	 * Convert the XML to a PDF
+	 * 
+	 * @param xmlFile The location of the XML file
+	 * @param crossword The crossword data
+	 * @param number The crossword number (if not null)
+	 */
 	public static void convertToPDF(File xmlFile, Crossword crossword, Integer number) {
 		String pdfFile = "./output/pdf/" + crossword.getFileName() + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".pdf";
 
@@ -242,6 +254,11 @@ public class CrosswordrMain {
 		}
 	}
 
+	/**
+	 * Merge all of the generated files into a single PDF file
+	 * 
+	 * @throws IOException
+	 */
 	private static void mergeFiles() throws IOException {
 		// now merge the files
 		if(GENERATED_FILES.size() != 0) {
@@ -253,6 +270,7 @@ public class CrosswordrMain {
 				LOGGER.info("Merging file '{}' into '{}'", generatedFile, destinationPdf);
 			}
 			pdfMergerUtility.mergeDocuments(null);
+			LOGGER.info("Merged {} file(s) to '{}'", GENERATED_FILES.size(), destinationPdf);
 		} else {
 			LOGGER.error("No generated files to merge... skipping...");
 		}
