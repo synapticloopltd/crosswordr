@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import javax.xml.transform.Result;
@@ -39,6 +38,8 @@ import synapticloop.crosswordr.crossword.Crossword;
 import synapticloop.crosswordr.exception.CrosswordrException;
 
 public class CrosswordrMain {
+	private static final String COMMAND_LINE_ARG_DATE_FORMAT = "yyyyMMdd";
+
 	private static final String CROSSWORD_TYPE_DATE_DEFAULT = "date";
 	private static final String CROSSWORD_TYPE_NUMBER = "number";
 
@@ -62,9 +63,9 @@ public class CrosswordrMain {
 		Date currentDate = null;
 		if(args.length != 0) {
 			String argZero = args[0];
-			LOGGER.info("Attempting to parse '{}' as a date.", argZero);
+			LOGGER.info("Attempting to parse '{}' as a date. Date format is {}", argZero, COMMAND_LINE_ARG_DATE_FORMAT);
 			try {
-				currentDate = new SimpleDateFormat("yyyyMMdd").parse(argZero);
+				currentDate = new SimpleDateFormat(COMMAND_LINE_ARG_DATE_FORMAT).parse(argZero);
 			} catch(ParseException ex) {
 				LOGGER.error("Exception: {}. Exiting...", ex.getMessage());
 				System.exit(-1);
@@ -104,7 +105,7 @@ public class CrosswordrMain {
 				// add a numeric format now
 				String translateDate = crosswordObject.getString(JSON_KEY_TRANSLATE_DATE);
 				String translateNumber = crosswordObject.getString(JSON_KEY_TRANSLATE_NUMBER);
-				Date dateTranslate = new SimpleDateFormat("yyyyMMdd").parse(translateDate);
+				Date dateTranslate = new SimpleDateFormat(COMMAND_LINE_ARG_DATE_FORMAT).parse(translateDate);
 
 				int numDaysDifference = (int)((currentDate.getTime() - dateTranslate.getTime()) / (1000 * 60 * 60 * 24) );
 				int parseInt = Integer.parseInt(translateNumber);
