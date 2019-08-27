@@ -223,9 +223,6 @@ public class CrosswordrMain {
 
 			Transformer transformer = factory.newTransformer(new StreamSource(resourceAsStream));
 			transformer.setParameter(XSLT_VARIABLE_CROSSWORD_NAME, crossword.getName());
-			//			if(crossword.getType().compareTo(CROSSWORD_TYPE_NUMBER)) {
-			//				transformer.setParameter("crosswordIdentifier", "#" + crossword.getTranslateNumber());
-			//			}
 			transformer.setParameter(XSLT_VARIABLE_CROSSWORD_IDENTIFIER, new SimpleDateFormat("dd MMMM yyyy").format(currentDate));
 			if(null != number) {
 				transformer.setParameter(XSLT_VARIABLE_CROSSWORD_NUMBER, number);
