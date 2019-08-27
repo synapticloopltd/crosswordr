@@ -30,6 +30,7 @@ import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
 import org.apache.fop.apps.FopFactory;
 import org.apache.fop.apps.MimeConstants;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,8 @@ public class CrosswordrMain {
 	private static final String JSON_KEY_TYPE = "type";
 	private static final String JSON_KEY_TRANSLATE_DATE = "translateDate";
 	private static final String JSON_KEY_TRANSLATE_NUMBER = "translateNumber";
+
+	private static List<String> GENERATED_FILES = new ArrayList<String>();
 
 	public static void main(String[] args) throws IOException, FOPException, TransformerException, ParseException {
 		Date currentDate = null;
@@ -164,6 +167,21 @@ public class CrosswordrMain {
 			}
 			convertToPDF(xmlFile, crossword, currentDate, crossword.getCrosswordNumber());
 		}
+
+		// now merge the files
+		if(GENERATED_FILES.size() != 0) {
+			PDFMergerUtility pdfMergerUtility= new PDFMergerUtility();
+			pdfMergerUtility.setDestinationFileName("./output/pdf/" + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".pdf");
+			for (String generatedFile : GENERATED_FILES) {
+				pdfMergerUtility.addSource(generatedFile);
+			}
+			pdfMergerUtility.mergeDocuments(null);
+			
+
+		} else {
+			LOGGER.error("No generated files to merge... skipping...");
+		}
+
 	}
 
 	public static void convertToPDF(File xmlFile, Crossword crossword, Date date, Integer number) {
@@ -213,6 +231,9 @@ public class CrosswordrMain {
 			// That's where the XML is first transformed to XSL-FO and then 
 			// PDF is created
 			transformer.transform(xmlSource, res);
+
+			// if we get to this point - then the file has been added
+			GENERATED_FILES.add(pdfFile);
 		} catch (FOPException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
