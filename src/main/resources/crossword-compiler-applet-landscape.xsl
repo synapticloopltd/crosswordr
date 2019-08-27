@@ -28,7 +28,7 @@
 			master-name="A4-landscape" 
 			page-height="21.0cm" 
 			page-width="29.7cm" 
-			margin-top="1 .0cm" 
+			margin-top="1.0cm" 
 			margin-left="1.0cm" 
 			margin-right="0.5cm" 
 			margin-bottom="0.5cm">
