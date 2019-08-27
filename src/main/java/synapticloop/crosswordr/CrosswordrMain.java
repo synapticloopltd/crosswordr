@@ -18,7 +18,6 @@ import java.util.Set;
 
 import javax.xml.transform.Result;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
@@ -39,17 +38,17 @@ import synapticloop.crosswordr.crossword.Crossword;
 import synapticloop.crosswordr.exception.CrosswordrException;
 
 public class CrosswordrMain {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CrosswordrMain.class);
+
+	// command line argument
 	private static final String COMMAND_LINE_ARG_DATE_FORMAT = "yyyyMMdd";
 
 	private static final String CROSSWORD_TYPE_DATE_DEFAULT = "date";
 	private static final String CROSSWORD_TYPE_NUMBER = "number";
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(CrosswordrMain.class);
-
-	private static List<Crossword> crosswords = new ArrayList<Crossword>();
-
 	private static final String CROSSWORDR_JSON = "./crosswordr.json";
 
+	// all the keys for the JSON parser
 	private static final String JSON_KEY_CROSSWORDS = "crosswords";
 	private static final String JSON_KEY_NAME = "name";
 	private static final String JSON_KEY_FILE_NAME = "file_name";
@@ -60,15 +59,23 @@ public class CrosswordrMain {
 	private static final String JSON_KEY_TRANSLATE_DATE = "translateDate";
 	private static final String JSON_KEY_TRANSLATE_NUMBER = "translateNumber";
 
+	// all the XSLT variables that we are pumping into the template
+	private static final String XSLT_VARIABLE_CROSSWORD_NAME = "crosswordName";
+	private static final String XSLT_VARIABLE_CROSSWORD_NUMBER = "crosswordNumber";
+	private static final String XSLT_VARIABLE_CROSSWORD_IDENTIFIER = "crosswordIdentifier";
+
+	private static List<Crossword> crosswords = new ArrayList<Crossword>();
+
 	private static List<String> GENERATED_FILES = new ArrayList<String>();
 
+	private static Date currentDate = null;
+
 	public static void main(String[] args) throws IOException, FOPException, TransformerException, ParseException {
-		Date currentDate = null;
 		if(args.length != 0) {
 			String argZero = args[0];
 			LOGGER.info("Attempting to parse '{}' as a date. Date format is {}", argZero, COMMAND_LINE_ARG_DATE_FORMAT);
 			try {
-				currentDate = new SimpleDateFormat(COMMAND_LINE_ARG_DATE_FORMAT).parse(argZero);
+				currentDate  = new SimpleDateFormat(COMMAND_LINE_ARG_DATE_FORMAT).parse(argZero);
 			} catch(ParseException ex) {
 				LOGGER.error("Exception: {}. Exiting...", ex.getMessage());
 				System.exit(-1);
@@ -76,9 +83,8 @@ public class CrosswordrMain {
 
 		} else {
 			LOGGER.info("No date passed through the command line, using today's date.");
-			currentDate = Calendar.getInstance().getTime();
+			currentDate  = Calendar.getInstance().getTime();
 		}
-
 
 		String crosswordrJson = FileUtils.readFileToString(new File(CROSSWORDR_JSON), Charset.defaultCharset());
 		JSONObject crosswordrJsonObject = new JSONObject(crosswordrJson);
@@ -92,7 +98,7 @@ public class CrosswordrMain {
 
 			if(crosswordType.equalsIgnoreCase(CROSSWORD_TYPE_DATE_DEFAULT)) {
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(urlFormat);
-				String formattedUrl = simpleDateFormat.format(currentDate);
+				String formattedUrl = simpleDateFormat.format(currentDate );
 
 				crosswords.add(
 						new Crossword(
@@ -110,7 +116,7 @@ public class CrosswordrMain {
 				String translateNumber = crosswordObject.getString(JSON_KEY_TRANSLATE_NUMBER);
 				Date dateTranslate = new SimpleDateFormat(COMMAND_LINE_ARG_DATE_FORMAT).parse(translateDate);
 
-				int numDaysDifference = (int)((currentDate.getTime() - dateTranslate.getTime()) / (1000 * 60 * 60 * 24) );
+				int numDaysDifference = (int)((currentDate .getTime() - dateTranslate.getTime()) / (1000 * 60 * 60 * 24) );
 				int parseInt = Integer.parseInt(translateNumber);
 
 				crosswordNumber = parseInt + numDaysDifference;
@@ -151,8 +157,14 @@ public class CrosswordrMain {
 			System.exit(-1);
 		}
 
+		writeXmlFilesAndMerge();
+
+		mergeFiles();
+	}
+
+	private static void writeXmlFilesAndMerge() throws IOException {
 		for (Crossword crossword : crosswords) {
-			String xmlFileName = "./output/xml/" + crossword.getFileName()  + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".xml";
+			String xmlFileName = "./output/xml/" + crossword.getFileName()  + new SimpleDateFormat("yyyy-MM-dd").format(currentDate ) + ".xml";
 			File xmlFile = new File(xmlFileName);
 			if(!xmlFile.exists()) {
 				LOGGER.info("Downloading file '{}'", xmlFileName);
@@ -165,27 +177,12 @@ public class CrosswordrMain {
 			} else {
 				LOGGER.info("File exists, not downloading file '{}'", xmlFileName);
 			}
-			convertToPDF(xmlFile, crossword, currentDate, crossword.getCrosswordNumber());
+			convertToPDF(xmlFile, crossword , crossword.getCrosswordNumber());
 		}
-
-		// now merge the files
-		if(GENERATED_FILES.size() != 0) {
-			PDFMergerUtility pdfMergerUtility= new PDFMergerUtility();
-			pdfMergerUtility.setDestinationFileName("./output/pdf/" + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".pdf");
-			for (String generatedFile : GENERATED_FILES) {
-				pdfMergerUtility.addSource(generatedFile);
-			}
-			pdfMergerUtility.mergeDocuments(null);
-			
-
-		} else {
-			LOGGER.error("No generated files to merge... skipping...");
-		}
-
 	}
 
-	public static void convertToPDF(File xmlFile, Crossword crossword, Date date, Integer number) {
-		String pdfFile = "./output/pdf/" + crossword.getFileName() + new SimpleDateFormat("yyyy-MM-dd").format(date) + ".pdf";
+	public static void convertToPDF(File xmlFile, Crossword crossword, Integer number) {
+		String pdfFile = "./output/pdf/" + crossword.getFileName() + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".pdf";
 
 		LOGGER.info("Converting file '{}' to '{}', with xsl '{}'", xmlFile.getName(), pdfFile, crossword.getXsl());
 
@@ -213,15 +210,15 @@ public class CrosswordrMain {
 			InputStream resourceAsStream = CrosswordrMain.class.getResourceAsStream("/" + crossword.getXsl());
 
 			Transformer transformer = factory.newTransformer(new StreamSource(resourceAsStream));
-			transformer.setParameter("crosswordName", crossword.getName());
+			transformer.setParameter(XSLT_VARIABLE_CROSSWORD_NAME, crossword.getName());
 			//			if(crossword.getType().compareTo(CROSSWORD_TYPE_NUMBER)) {
 			//				transformer.setParameter("crosswordIdentifier", "#" + crossword.getTranslateNumber());
 			//			}
-			transformer.setParameter("crosswordIdentifier", new SimpleDateFormat("dd MMMM yyyy").format(date));
+			transformer.setParameter(XSLT_VARIABLE_CROSSWORD_IDENTIFIER, new SimpleDateFormat("dd MMMM yyyy").format(currentDate));
 			if(null != number) {
-				transformer.setParameter("crosswordNumber", number);
+				transformer.setParameter(XSLT_VARIABLE_CROSSWORD_NUMBER, number);
 			} else {
-				transformer.setParameter("crosswordNumber", -1);
+				transformer.setParameter(XSLT_VARIABLE_CROSSWORD_NUMBER, -1);
 			}
 
 			// Resulting SAX events (the generated FO) must be piped through to FOP
@@ -234,22 +231,30 @@ public class CrosswordrMain {
 
 			// if we get to this point - then the file has been added
 			GENERATED_FILES.add(pdfFile);
-		} catch (FOPException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerConfigurationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TransformerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} catch (FOPException | TransformerException ex) {
+			LOGGER.error("Exception caught, message was: {}", ex);
 		} finally {
 			try {
 				out.close();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				// do nothing
 			}
+		}
+	}
+
+	private static void mergeFiles() throws IOException {
+		// now merge the files
+		if(GENERATED_FILES.size() != 0) {
+			PDFMergerUtility pdfMergerUtility= new PDFMergerUtility();
+			String destinationPdf = "./output/pdf/" + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".pdf";
+			pdfMergerUtility.setDestinationFileName(destinationPdf);
+			for (String generatedFile : GENERATED_FILES) {
+				pdfMergerUtility.addSource(generatedFile);
+				LOGGER.info("Merging file '{}' into '{}'", generatedFile, destinationPdf);
+			}
+			pdfMergerUtility.mergeDocuments(null);
+		} else {
+			LOGGER.error("No generated files to merge... skipping...");
 		}
 	}
 }
