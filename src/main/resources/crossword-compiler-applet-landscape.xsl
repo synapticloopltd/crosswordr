@@ -168,18 +168,39 @@
 
 	<xsl:for-each select="/cc:crossword-compiler-applet/rp:rectangular-puzzle/rp:crossword/rp:grid/rp:cell[@y = ((($position -1) mod $height) + 1)]">
 
-		<xsl:choose>
-			<xsl:when test="not(count(./@type) = 0)">
-				<fo:table-cell border="solid" border-collapse="collapse" width="8mm" height="8mm" background-color="black">
-					<fo:block />
-				</fo:table-cell>
+			<xsl:when test="$width > 17">
+			<xsl:variable name="boxWidth"><xsl:value-of select="8 - ($width - 17) + 1" />mm</xsl:variable>
+
+				<xsl:choose>
+					<xsl:when test="not(count(./@type) = 0)">
+						<fo:table-cell border="solid" border-collapse="collapse" width="7mm" height="7mm" background-color="black">
+							<fo:block />
+						</fo:table-cell>
+					</xsl:when>
+					<xsl:otherwise>
+						<fo:table-cell border="solid" border-collapse="collapse" width="7mm" height="7mm" padding-left="0.6mm"  font-size="8pt">
+							<fo:block ><xsl:value-of select="./@number" /></fo:block>
+						</fo:table-cell>
+					</xsl:otherwise>
+				</xsl:choose>
+
 			</xsl:when>
 			<xsl:otherwise>
-				<fo:table-cell border="solid" border-collapse="collapse" width="8mm" height="8mm" padding-left="0.6mm"  font-size="8pt">
-					<fo:block ><xsl:value-of select="./@number" /></fo:block>
-				</fo:table-cell>
-			</xsl:otherwise>
-		</xsl:choose>
+
+				<xsl:choose>
+					<xsl:when test="not(count(./@type) = 0)">
+						<fo:table-cell border="solid" border-collapse="collapse" width="8mm" height="8mm" background-color="black">
+							<fo:block />
+						</fo:table-cell>
+					</xsl:when>
+					<xsl:otherwise>
+						<fo:table-cell border="solid" border-collapse="collapse" width="8mm" height="8mm" padding-left="0.6mm"  font-size="8pt">
+							<fo:block ><xsl:value-of select="./@number" /></fo:block>
+						</fo:table-cell>
+					</xsl:otherwise>
+				</xsl:choose>
+
+		</xsl:otherwise>
 
 	</xsl:for-each>
 
