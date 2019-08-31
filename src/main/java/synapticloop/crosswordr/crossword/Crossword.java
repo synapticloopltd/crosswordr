@@ -17,6 +17,8 @@ import synapticloop.crosswordr.extractor.ExtractorBase;
 public class Crossword {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Crossword.class);
 
+	private boolean isCorrect = true;
+
 	private String name = null;
 	private String fileName = null;
 	private String formattedUrl = null;
@@ -113,4 +115,6 @@ public class Crossword {
 	public Integer getCrosswordNumber() { return crosswordNumber; }
 	public void setCrosswordNumber(Integer crosswordNumber) { this.crosswordNumber = crosswordNumber; }
 
+	public void setIsCorrect(boolean isCorrect) { this.isCorrect = isCorrect; }
+	public boolean getIsCorrect() { return(this.isCorrect); }
 }

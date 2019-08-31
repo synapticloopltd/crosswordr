@@ -24,7 +24,6 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
@@ -180,6 +179,7 @@ public class CrosswordrMain {
 				try {
 					FileUtils.writeStringToFile(xmlFile, crossword.getData(), Charset.defaultCharset());
 				} catch (CrosswordrException ex) {
+					crossword.setIsCorrect(false);
 					LOGGER.error(ex.getMessage(), ex);
 					continue;
 				}
@@ -198,6 +198,10 @@ public class CrosswordrMain {
 	 * @param number The crossword number (if not null)
 	 */
 	public static void convertToPDF(File xmlFile, Crossword crossword, Integer number) {
+		if(!crossword.getIsCorrect()) {
+			LOGGER.error("Crossword '{}' for '{}' is marked as not correct, ignoring...", crossword.getName(), crossword.getFileName());
+			return;
+		}
 		String pdfFile = "./output/pdf/" + crossword.getFileName() + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".pdf";
 
 		LOGGER.info("Converting file '{}' to '{}', with xsl '{}'", xmlFile.getName(), pdfFile, crossword.getXsl());

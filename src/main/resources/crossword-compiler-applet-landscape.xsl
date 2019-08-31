@@ -167,7 +167,7 @@
 	<xsl:variable name="height" select="/cc:crossword-compiler-applet/rp:rectangular-puzzle/rp:crossword/rp:grid/@height" />
 
 	<xsl:for-each select="/cc:crossword-compiler-applet/rp:rectangular-puzzle/rp:crossword/rp:grid/rp:cell[@y = ((($position -1) mod $height) + 1)]">
-
+		<xsl:choose>
 			<xsl:when test="$width > 17">
 			<xsl:variable name="boxWidth"><xsl:value-of select="8 - ($width - 17) + 1" />mm</xsl:variable>
 
@@ -200,7 +200,10 @@
 					</xsl:otherwise>
 				</xsl:choose>
 
-		</xsl:otherwise>
+			</xsl:otherwise>
+
+
+		</xsl:choose>
 
 	</xsl:for-each>
 
