@@ -24,6 +24,7 @@ import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FOUserAgent;
 import org.apache.fop.apps.Fop;
@@ -71,6 +72,9 @@ public class CrosswordrMain {
 	private static Date currentDate = null;
 
 	public static void main(String[] args) throws IOException, FOPException, TransformerException, ParseException {
+		FileUtils.forceMkdir(new File("./output/xml"));
+		FileUtils.forceMkdir(new File("./output/pdf"));
+
 		if(args.length != 0) {
 			String argZero = args[0];
 			LOGGER.info("Attempting to parse '{}' as a date. Date format is {}", argZero, COMMAND_LINE_ARG_DATE_FORMAT);
