@@ -8,6 +8,20 @@ import org.json.JSONObject;
 import synapticloop.crosswordr.extractor.data.Cell;
 
 public class JSONDataToXMLExtractor extends ExtractorBase {
+	private static final String JSON_KEY_NUM_ROWS = "num_rows";
+	private static final String JSON_KEY_NUM_COLUMNS = "num_columns";
+	private static final String JSON_KEY_CELLS = "cells";
+	private static final String JSON_KEY_META = "meta";
+	private static final String JSON_KEY_DATA = "data";
+	private static final String JSON_KEY_WORD = "word";
+	private static final String JSON_KEY_DIR = "dir";
+	private static final String JSON_KEY_START_K = "start_k";
+	private static final String JSON_KEY_START_J = "start_j";
+	private static final String JSON_KEY_CLUE = "clue";
+
+	private static final String JSON_KEY_DIRECTION_A = "a";
+	private static final String JSON_KEY_DIRECTION_D = "d";
+
 	private Map<String, String> keyValues = new HashMap<String, String>();
 
 	private Cell[][] cells = new Cell[100][100];
@@ -18,7 +32,7 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 	@Override
 	public String extract(String data) {
 		JSONObject jsonObject = new JSONObject(data);
-		String urlData= jsonObject.getJSONArray("cells").getJSONObject(0).getJSONObject("meta").getString("data");
+		String urlData= jsonObject.getJSONArray(JSON_KEY_CELLS).getJSONObject(0).getJSONObject(JSON_KEY_META).getString(JSON_KEY_DATA);
 
 		String[] parameters = urlData.split("&");
 
@@ -30,27 +44,27 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 			keyValues.put(keyValue[0], keyValue[1]);
 		}
 		// now that we have all of the values, time to generate the xml file
-		height = Integer.valueOf(keyValues.get("num_rows"));
-		width = Integer.valueOf(keyValues.get("num_columns"));
+		height = Integer.valueOf(keyValues.get(JSON_KEY_NUM_ROWS));
+		width = Integer.valueOf(keyValues.get(JSON_KEY_NUM_COLUMNS));
 		return(generateDataAndXml());
 	}
 
 	private String generateDataAndXml() {
 		int i = 0;
 		while(true) {
-			String value = keyValues.get("word" + i);
+			String value = keyValues.get(JSON_KEY_WORD + i);
 
 			if(value == null) {
 				extractClues();
 				return(generateXML());
 			}
 
-			String direction = keyValues.get("dir" + i);
-			int x = Integer.parseInt(keyValues.get("start_k" + i));
-			int y = Integer.parseInt(keyValues.get("start_j" + i));
-			String clue = keyValues.get("clue" + i);
+			String direction = keyValues.get(JSON_KEY_DIR + i);
+			int x = Integer.parseInt(keyValues.get(JSON_KEY_START_K + i));
+			int y = Integer.parseInt(keyValues.get(JSON_KEY_START_J + i));
+			String clue = keyValues.get(JSON_KEY_CLUE + i);
 
-			if(direction.equals("a")) {
+			if(direction.equals(JSON_KEY_DIRECTION_A)) {
 				for (int j = 0; j < value.length(); j++) {
 					Cell cell = cells[x + j][y];
 					if(null == cell) {
@@ -65,7 +79,7 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 					}
 					cells[x + j][y] = cell;
 				}
-			} else if(direction.equals("d")) {
+			} else if(direction.equals(JSON_KEY_DIRECTION_D)) {
 				for (int j = 0; j < value.length(); j++) {
 					Cell cell = cells[x][y + j];
 					if(null == cell) {
@@ -76,7 +90,7 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 						cell.setCharacter(value.charAt(j));
 						cell.setLength(value.length());
 					} else {
-							cell.setCharacter(value.charAt(j));
+						cell.setCharacter(value.charAt(j));
 					}
 					cells[x][y + j] = cell;
 				}
@@ -115,17 +129,18 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 
 	private String generateXML() {
 		StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
-				"<crossword-compiler xmlns=\"http://crossword.info/xml/crossword-compiler\">\n" + 
-				"  <rectangular-puzzle xmlns=\"http://crossword.info/xml/rectangular-puzzle\" alphabet=\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\">\n" + 
-				"    <metadata>\n" + 
-				"      <title />\n" + 
-				"      <creator />\n" + 
-				"      <copyright />\n" + 
-				"      <description />\n" + 
-				"    </metadata>\n" + 
-				"    <crossword>\n" + 
-				"      <grid width=\"" + width + "\" height=\"" + height + "\">\n");
+		stringBuffer.append(
+				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
+						"<crossword-compiler xmlns=\"http://crossword.info/xml/crossword-compiler\">\n" + 
+						"  <rectangular-puzzle xmlns=\"http://crossword.info/xml/rectangular-puzzle\" alphabet=\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\">\n" + 
+						"    <metadata>\n" + 
+						"      <title />\n" + 
+						"      <creator />\n" + 
+						"      <copyright />\n" + 
+						"      <description />\n" + 
+						"    </metadata>\n" + 
+						"    <crossword>\n" + 
+						"      <grid width=\"" + width + "\" height=\"" + height + "\">\n");
 
 		// now for the cells
 		int x = 0;
@@ -136,13 +151,14 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 		while(keepPrinting) {
 			Cell cell = cells[x][y];
 			if(null != cell) {
-				stringBuffer.append("<cell x=\"" + 
-							(x + 1) + 
-							"\" y=\"" + 
-							(y + 1) + 
-							"\" solution=\"" + 
-							cell.getCharacter() +
-							"\"");
+				stringBuffer.append(
+						"<cell x=\"" + 
+								(x + 1) + 
+								"\" y=\"" + 
+								(y + 1) + 
+								"\" solution=\"" + 
+								cell.getCharacter() +
+						"\"");
 				if(null != cell.getNumber()) {
 					stringBuffer.append(" number=\"");
 					stringBuffer.append(cell.getNumber());
@@ -163,10 +179,11 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 			}
 		}
 
-		stringBuffer.append("      </grid>\n"
-				+ "      <clues ordering=\"normal\">\n" + 
-				"        <title>\n" + 
-				"          <b>Across</b>\n" + 
+		stringBuffer.append(
+				"      </grid>\n" +
+						"      <clues ordering=\"normal\">\n" + 
+						"        <title>\n" + 
+						"          <b>Across</b>\n" + 
 				"        </title>\n");
 
 		x = 0;
@@ -177,10 +194,11 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 			Cell cell = cells[x][y];
 			if(null != cell) {
 				if(null != cell.getAcrossClue()) {
-					stringBuffer.append("<clue number=\"" + 
-							cell.getNumber()+ 
-							"\" format=\"\">" + 
-							cell.getAcrossClue() + 
+					stringBuffer.append(
+							"<clue number=\"" + 
+									cell.getNumber()+ 
+									"\" format=\"\">" + 
+									cell.getAcrossClue() + 
 							"</clue>\n");
 				}
 			}
@@ -197,9 +215,11 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 			}
 		}
 
-		stringBuffer.append("      </clues>\n      <clues ordering=\"normal\">\n" + 
-				"        <title>\n" + 
-				"          <b>Down</b>\n" + 
+		stringBuffer.append(
+				"      </clues>\n" + 
+						"      <clues ordering=\"normal\">\n" + 
+						"        <title>\n" + 
+						"          <b>Down</b>\n" + 
 				"        </title>\n");
 
 		x = 0;
@@ -210,10 +230,11 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 			Cell cell = cells[x][y];
 			if(null != cell) {
 				if(null != cell.getDownClue()) {
-					stringBuffer.append("<clue number=\"" + 
-							cell.getNumber()+ 
-							"\" format=\"\">" + 
-							cell.getDownClue() + 
+					stringBuffer.append(
+							"<clue number=\"" + 
+									cell.getNumber()+ 
+									"\" format=\"\">" + 
+									cell.getDownClue() + 
 							"</clue>\n");
 				}
 			}
@@ -230,9 +251,10 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 			}
 		}
 
-		stringBuffer.append("      </clues>\n" + 
-				"    </crossword>\n" + 
-				"  </rectangular-puzzle>\n" + 
+		stringBuffer.append(
+				"      </clues>\n" + 
+						"    </crossword>\n" + 
+						"  </rectangular-puzzle>\n" + 
 				"</crossword-compiler>\n");
 		return(stringBuffer.toString());
 	}
