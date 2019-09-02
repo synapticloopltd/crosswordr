@@ -16,21 +16,18 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 
 	private int width = -1;
 	private int height = -1;
-	private List<String> acrossClues = new ArrayList<String>();
-	private List<String> downClues = new ArrayList<String>();
 
 	@Override
 	public String extract(String data) {
 		JSONObject jsonObject = new JSONObject(data);
 		String urlData= jsonObject.getJSONArray("cells").getJSONObject(0).getJSONObject("meta").getString("data");
-		System.out.println(urlData);
+
 		String[] parameters = urlData.split("&");
 
 		for (String parameter : parameters) {
 			if(parameter.trim().length() == 0) {
 				continue;
 			}
-			System.out.println(parameter);
 			String[] keyValue = parameter.split("=");
 			keyValues.put(keyValue[0], keyValue[1]);
 		}
@@ -54,12 +51,6 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 			int x = Integer.parseInt(keyValues.get("start_k" + i));
 			int y = Integer.parseInt(keyValues.get("start_j" + i));
 			String clue = keyValues.get("clue" + i);
-
-			System.out.println("word" + i + ": " + value);
-			System.out.println("dir" + i + ": " + direction);
-			System.out.println("startx" + i + ": " + x);
-			System.out.println("starty" + i + ": " + y);
-			System.out.println("clue" + i + ": " + clue);
 
 			if(direction.equals("a")) {
 				for (int j = 0; j < value.length(); j++) {
@@ -245,7 +236,6 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 				"    </crossword>\n" + 
 				"  </rectangular-puzzle>\n" + 
 				"</crossword-compiler>\n");
-		System.out.println(stringBuffer.toString());
 		return(stringBuffer.toString());
 	}
 }
