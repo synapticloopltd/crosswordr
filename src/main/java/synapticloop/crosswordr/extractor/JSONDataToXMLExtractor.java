@@ -1,8 +1,6 @@
 package synapticloop.crosswordr.extractor;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.json.JSONObject;
@@ -12,7 +10,7 @@ import synapticloop.crosswordr.extractor.data.Cell;
 public class JSONDataToXMLExtractor extends ExtractorBase {
 	private Map<String, String> keyValues = new HashMap<String, String>();
 
-	private Cell[][] cells = new Cell[20][20];
+	private Cell[][] cells = new Cell[100][100];
 
 	private int width = -1;
 	private int height = -1;
