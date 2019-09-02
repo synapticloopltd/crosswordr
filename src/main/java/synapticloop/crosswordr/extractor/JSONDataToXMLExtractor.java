@@ -12,7 +12,6 @@ import synapticloop.crosswordr.extractor.data.Cell;
 public class JSONDataToXMLExtractor extends ExtractorBase {
 	private Map<String, String> keyValues = new HashMap<String, String>();
 
-	private String[][] letters = new String[20][20];
 	private Cell[][] cells = new Cell[20][20];
 
 	private int width = -1;
@@ -72,16 +71,14 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 						cell.setAcrossClue(clue);
 						cell.setCharacter(value.charAt(j));
 						cell.setLength(value.length());
-						letters[x + j][y] = i + ":a:" + value.charAt(j) + "";
 					} else {
 						cell.setCharacter(value.charAt(j));
-						letters[x + j][y] = value.charAt(j) + "";
 					}
+					cells[x + j][y] = cell;
 				}
-				System.out.println();
 			} else if(direction.equals("d")) {
 				for (int j = 0; j < value.length(); j++) {
-					Cell cell = cells[x + j][y];
+					Cell cell = cells[x][y + j];
 					if(null == cell) {
 						cell = new Cell();
 					}
@@ -89,13 +86,10 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 						cell.setDownClue(clue);
 						cell.setCharacter(value.charAt(j));
 						cell.setLength(value.length());
-						letters[x][y + j] = i + ":d:" + value.charAt(j) + "";
 					} else {
-						if(letters[x][y + j] == null) {
 							cell.setCharacter(value.charAt(j));
-							letters[x][y + j] = value.charAt(j) + "";
-						}
 					}
+					cells[x][y + j] = cell;
 				}
 			}
 			i++;
@@ -116,6 +110,7 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 					numClue++;
 				}
 			}
+
 			x++;
 
 			if(x == width) {
@@ -126,61 +121,6 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 					keepGoing = false;
 				}
 			}
-		}
-
-		int clueNumber = 1;
-
-		x = 0;
-		y = 0;
-
-		boolean keepPrinting = true;
-
-		while(keepPrinting) {
-			String letter = letters[x][y];
-			if(null != letter) {
-				if(letter.contains(":")) {
-					if(letter.contains(":a:")) {
-						acrossClues.add(
-								clueNumber +
-								":" +
-								letter.substring(0, letter.indexOf(":") + 1) + 
-								keyValues.get("clue" + letter.substring(0, letter.indexOf(":"))));
-					} else {
-						downClues.add(
-								clueNumber + 
-								":" + 
-								letter.substring(0, letter.indexOf(":") + 1) + 
-								keyValues.get("clue" + letter.substring(0, letter.indexOf(":"))));
-					}
-					System.out.print(String.format("%02d:", clueNumber) + letter.substring(letter.length() -1));
-					letters[x][y] = String.format("%02d:", clueNumber) + letter.substring(letter.length() -1);
-					clueNumber++;
-				} else {
-					System.out.print("   " + letter);
-				}
-			} else {
-				System.out.print("    ");
-			}
-			x++;
-
-			if(x == width) {
-				y++;
-				x = 0;
-				System.out.println();
-				if(y == height) {
-					keepPrinting = false;
-				}
-			}
-		}
-
-		System.out.println("across");
-		for (String string : acrossClues) {
-			System.out.println(string);
-		}
-
-		System.out.println("down");
-		for (String string : downClues) {
-			System.out.println(string);
 		}
 	}
 
@@ -205,20 +145,21 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 		boolean keepPrinting = true;
 
 		while(keepPrinting) {
-			String letter = letters[x][y];
-			if(null != letter) {
-				if(letter.contains(":")) {
-					stringBuffer.append("<cell x=\"" + 
+			Cell cell = cells[x][y];
+			if(null != cell) {
+				stringBuffer.append("<cell x=\"" + 
 							(x + 1) + 
 							"\" y=\"" + 
 							(y + 1) + 
 							"\" solution=\"" + 
-							(letter.substring(letter.length() -1)) + 
-							"\" number=\"" + 
-							(Integer.valueOf(letter.substring(0, letter.indexOf(":"))) + "\" />\n"));
-				} else {
-					stringBuffer.append("<cell x=\"" + (x + 1) + "\" y=\"" + (y + 1) + "\" solution=\"" + letter + "\" />\n");
+							cell.getCharacter() +
+							"\"");
+				if(null != cell.getNumber()) {
+					stringBuffer.append(" number=\"");
+					stringBuffer.append(cell.getNumber());
+					stringBuffer.append("\"");
 				}
+				stringBuffer.append("/>\n");
 			} else {
 				stringBuffer.append("<cell x=\"" + (x + 1) + "\" y=\"" + (y + 1) + "\" type=\"block\" />\n");
 			}
@@ -239,24 +180,65 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 				"          <b>Across</b>\n" + 
 				"        </title>\n");
 
-		for (String clue : acrossClues) {
-			stringBuffer.append("<clue number=\"" + 
-					(clue.substring(0, clue.indexOf(":")))+ 
-					"\" format=\"\">" + 
-					clue.substring(clue.lastIndexOf(":") + 1) + 
-					"</clue>\n");
+		x = 0;
+		y = 0;
+
+		boolean keepGoing = true;
+		while(keepGoing) {
+			Cell cell = cells[x][y];
+			if(null != cell) {
+				if(null != cell.getAcrossClue()) {
+					stringBuffer.append("<clue number=\"" + 
+							cell.getNumber()+ 
+							"\" format=\"\">" + 
+							cell.getAcrossClue() + 
+							"</clue>\n");
+				}
+			}
+
+			x++;
+
+			if(x == width) {
+				y++;
+				x = 0;
+
+				if(y == height) {
+					keepGoing = false;
+				}
+			}
 		}
-		stringBuffer.append("</clues>\n      <clues ordering=\"normal\">\n" + 
+
+		stringBuffer.append("      </clues>\n      <clues ordering=\"normal\">\n" + 
 				"        <title>\n" + 
 				"          <b>Down</b>\n" + 
 				"        </title>\n");
 
-		for (String clue : downClues) {
-			stringBuffer.append("<clue number=\"" + 
-					(clue.substring(0, clue.indexOf(":")))+ 
-					"\" format=\"\">" + 
-					clue.substring(clue.lastIndexOf(":") + 1) + 
-					"</clue>\n");
+		x = 0;
+		y = 0;
+
+		keepGoing = true;
+		while(keepGoing) {
+			Cell cell = cells[x][y];
+			if(null != cell) {
+				if(null != cell.getDownClue()) {
+					stringBuffer.append("<clue number=\"" + 
+							cell.getNumber()+ 
+							"\" format=\"\">" + 
+							cell.getDownClue() + 
+							"</clue>\n");
+				}
+			}
+
+			x++;
+
+			if(x == width) {
+				y++;
+				x = 0;
+
+				if(y == height) {
+					keepGoing = false;
+				}
+			}
 		}
 
 		stringBuffer.append("      </clues>\n" + 
