@@ -82,7 +82,14 @@
 										<xsl:for-each select="./rp:clue">
 											<fo:table-row>
 												<fo:table-cell>
-													<fo:block><xsl:value-of select="@number" />. <xsl:value-of select="." /> (<xsl:value-of select="@format" />)</fo:block>
+													<xsl:choose>
+														<xsl:when test="@format = ''">
+															<fo:block><xsl:value-of select="@number" />. <xsl:value-of select="." /></fo:block>
+														</xsl:when>
+														<xsl:otherwise>
+															<fo:block><xsl:value-of select="@number" />. <xsl:value-of select="." /> (<xsl:value-of select="@format" />)</fo:block>
+														</xsl:otherwise>
+													</xsl:choose>
 												</fo:table-cell>
 											</fo:table-row>
 										</xsl:for-each>
