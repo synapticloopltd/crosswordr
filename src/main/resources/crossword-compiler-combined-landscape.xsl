@@ -51,6 +51,7 @@
 		<fo:inline font-size="10pt" font-family="serif"><xsl:value-of select="$crosswordIdentifier" /></fo:inline>
 	</fo:block>
 </xsl:template>
+
 <!--
   For those xml crosswords which are applet namespaced - this is the solution
   -->
