@@ -145,3 +145,20 @@ bintray {
 	]
 }
 
+copyrightr {
+	dryRun = false
+	copyrightHolder = "Synapticloop"
+	includes = [ 
+		"src/**/*.java",
+		"src/**/*.groovy"
+	]
+
+	excludes = [ "**/*.class" ]
+
+	onlyReplaceFirst = true
+
+	yearSeparator = " - "
+
+	failOnMissing = false
+}
+
