@@ -56,72 +56,32 @@
   For those xml crosswords which are applet namespaced - this is the solution
   -->
 <xsl:template match="/cca:crossword-compiler-applet">
-	<fo:root>
-
-		<xsl:call-template name="setup-page-sizings" />
-
-		<!-- 
-		   This is the solution to the crossword
-		  -->
-
-		<!--  Start of the crossword solution -->
-		<fo:page-sequence master-reference="A4-landscape">
-			<fo:static-content flow-name="xsl-region-after">
-				<xsl:for-each select="/cca:crossword-compiler-applet/rp:rectangular-puzzle/rp:crossword/rp:grid/rp:cell">
-
-					<xsl:if test="@x = 1">
-						<fo:block font-size="4pt">
-							<fo:table border-collapse="collapse" border-color="#444444">
-
-								<fo:table-body>
-									<fo:table-row>
-
-									<xsl:call-template name="table-row-solution">
-										<xsl:with-param name="nodes" select="/cca:crossword-compiler-applet" />
-										<xsl:with-param name="position" select="position()" />
-									</xsl:call-template>
-
-									<fo:table-cell><!-- EMPTY - TO FORCE RIGHT ALIGN --><fo:block /></fo:table-cell>
-
-								</fo:table-row>
-							</fo:table-body>
-						</fo:table>
-					</fo:block>
-
-				</xsl:if>
-			</xsl:for-each>
-		</fo:static-content>
-		<!--  end of the crossword solution -->
-
-	<!-- 
-	  Start of the blank crossword, and the questions
-	   -->
-	<fo:flow flow-name="xsl-region-body">
-
-		<xsl:call-template name="crossword-title" />
-
-		<xsl:call-template name="table-empty-crossword">
-			<xsl:with-param name="nodes" select="/cca:crossword-compiler-applet" />
-		</xsl:call-template>
-
-
-	</fo:flow>
-
-</fo:page-sequence>
-
-</fo:root>
+	<xsl:call-template name="crossword">
+		<xsl:with-param name="crossword-data" select="/cca:crossword-compiler-applet" />
+	</xsl:call-template>
 </xsl:template>
 
+<!--
+  For those xml crosswords which are normally namespaced - this is the solution
+  -->
 <xsl:template match="/cc:crossword-compiler">
-<fo:root>
-	<xsl:call-template name="setup-page-sizings" />
+	<xsl:call-template name="crossword">
+		<xsl:with-param name="crossword-data" select="/cc:crossword-compiler" />
+	</xsl:call-template>
+</xsl:template>
+
+<xsl:template name="crossword">
+	<xsl:param name="crossword-data" />
+
+	<fo:root>
+		<xsl:call-template name="setup-page-sizings" />
 
 <fo:page-sequence master-reference="A4-landscape">
 <!-- 
    This is the solution to the crossword
   -->
 <fo:static-content flow-name="xsl-region-after">
-	<xsl:for-each select="/cc:crossword-compiler/rp:rectangular-puzzle/rp:crossword/rp:grid/rp:cell">
+	<xsl:for-each select="$crossword-data/rp:rectangular-puzzle/rp:crossword/rp:grid/rp:cell">
 
 		<xsl:if test="@x = 1">
 			<fo:block font-size="4pt">
@@ -131,7 +91,7 @@
 						<fo:table-row>
 
 							<xsl:call-template name="table-row-solution">
-								<xsl:with-param name="nodes" select="/cc:crossword-compiler" />
+								<xsl:with-param name="nodes" select="$crossword-data" />
 								<xsl:with-param name="position" select="position()" />
 							</xsl:call-template>
 
@@ -155,7 +115,7 @@
 		<xsl:call-template name="crossword-title" />
 
 		<xsl:call-template name="table-empty-crossword">
-			<xsl:with-param name="nodes" select="/cc:crossword-compiler" />
+			<xsl:with-param name="nodes" select="$crossword-data" />
 		</xsl:call-template>
 
 	</fo:flow>
