@@ -1,4 +1,4 @@
-package synapticloop.crosswordr.exception;
+package synapticloop.puzzlr.extractor;
 
 /*
  * Copyright (c) 2019 Synapticloop.
@@ -16,11 +16,6 @@ package synapticloop.crosswordr.exception;
  * this source code or binaries.
  */
 
-public class CrosswordrException extends Exception {
-	public CrosswordrException(String message, Exception exception) {
-		super(message, exception);
-	}
-
-	private static final long serialVersionUID = 6321463505225680651L;
-
+public abstract class ExtractorBase {
+	public abstract String extract(String data);
 }

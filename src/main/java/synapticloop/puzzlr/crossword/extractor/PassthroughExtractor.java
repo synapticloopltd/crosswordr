@@ -1,4 +1,6 @@
-package synapticloop.crosswordr.extractor;
+package synapticloop.puzzlr.crossword.extractor;
+
+import synapticloop.puzzlr.extractor.ExtractorBase;
 
 /*
  * Copyright (c) 2019 Synapticloop.

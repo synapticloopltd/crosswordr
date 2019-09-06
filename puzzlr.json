@@ -1,0 +1,59 @@
+{
+	"crosswords": [
+		{
+			"name": "The Canberra Times Cryptic Crossword",
+			"file_name": "the_canberra_times_cryptic_crossword_",
+			"url_format": "'https://data.puzzlexperts.com/puzzleapp-v3/data.php?psid=100000842&date='yyyy-MM-dd",
+			"extractor": "synapticloop.puzzlr.crossword.extractor.JSONDataToXMLExtractor",
+			"xsl": "crossword-compiler-landscape.xsl"
+		},
+		{
+			"name": "Evening Standard Cryptic Crossword",
+			"file_name": "evening_standard_cryptic_crossword_",
+			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/evening-standard/daily-crossword/cryp_'yyMMdd'.xml'",
+			"extractor": "synapticloop.puzzlr.crossword.extractor.PassthroughExtractor",
+			"xsl": "crossword-compiler-landscape.xsl"
+		},
+		{
+			"name": "Trinity Mirror Cryptic Crossword",
+			"file_name": "trinity_mirror_cryptic_crossword_",
+			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/trinity-mirror-co-uk/mirror_crossword_feeds/cryptic_crossword/mir_2s_cryptic_'yyyyMMdd'.xml'",
+			"extractor": "synapticloop.puzzlr.crossword.extractor.PassthroughExtractor",
+			"xsl": "crossword-compiler-landscape.xsl"
+		},
+		{
+			"name": "The Independent's Cryptic Crossword",
+			"file_name": "the_independents_cryptic_crossword_",
+			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/independent/daily-crossword/c_'yyMMdd'.xml'",
+			"extractor": "synapticloop.puzzlr.crossword.extractor.PassthroughExtractor",
+			"xsl": "crossword-compiler-landscape.xsl"
+		},
+		{
+			"name": "The Globe and Mail Cryptic Crossword",
+			"file_name": "the_globe_and_mail_cryptic_crossword_",
+			"url_format": "https://xwords.net/xwordjs/files/html5/%dcrp.js",
+			"extractor": "synapticloop.puzzlr.crossword.extractor.JavascriptExtractor",
+			"xsl": "crossword-compiler-landscape.xsl",
+			"type": "number",
+			"translateDate": "20190814",
+			"translateNumber": "16142"
+		},
+		{
+			"name": "The Herald Sun Cryptic Crossword",
+			"file_name": "the_herald_sun_cryptic_crossword_",
+			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/bestforpuzzles-ftp/dailycryptic//daily-cryptic-'yyMMdd'.xml'",
+			"extractor": "synapticloop.puzzlr.crossword.extractor.PassthroughExtractor",
+			"xsl": "crossword-compiler-landscape.xsl",
+			"type": "date"
+		}
+	],
+	"sudokus": [
+		{
+			"name": "Evening Standard Daily",
+			"file_name": "evening_standard_daily_sudoku_",
+			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/the-daily-games/the-daily-sudoku/sdk'yyMMdd'.xml'",
+			"extractor": "synapticloop.puzzlr.sudoku.extractor.PassthroughExtractor",
+			"xsl": "sudoku-compiler-landscape.xsl"
+		}
+	]
+}

@@ -1,4 +1,4 @@
-package synapticloop.crosswordr.extractor.data;
+package synapticloop.puzzlr.crossword.extractor.data;
 
 /*
  * Copyright (c) 2019 Synapticloop.

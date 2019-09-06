@@ -1,4 +1,4 @@
-package synapticloop.crosswordr.extractor;
+package synapticloop.puzzlr.crossword.extractor;
 
 /*
  * Copyright (c) 2019 Synapticloop.
@@ -21,7 +21,8 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
-import synapticloop.crosswordr.extractor.data.Cell;
+import synapticloop.puzzlr.crossword.extractor.data.Cell;
+import synapticloop.puzzlr.extractor.ExtractorBase;
 
 public class JSONDataToXMLExtractor extends ExtractorBase {
 	private static final String JSON_KEY_NUM_ROWS = "num_rows";

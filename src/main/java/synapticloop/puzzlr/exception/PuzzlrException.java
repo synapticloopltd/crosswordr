@@ -1,4 +1,4 @@
-package synapticloop.crosswordr.extractor;
+package synapticloop.puzzlr.exception;
 
 /*
  * Copyright (c) 2019 Synapticloop.
@@ -16,13 +16,11 @@ package synapticloop.crosswordr.extractor;
  * this source code or binaries.
  */
 
-public class JavascriptExtractor extends ExtractorBase {
-
-	@Override
-	public String extract(String data) {
-		int startQuote = data.indexOf("\"");
-		int endQuote = data.lastIndexOf("\"");
-		return(data.substring(startQuote + 1, endQuote).replaceAll("\\\\", ""));
+public class PuzzlrException extends Exception {
+	public PuzzlrException(String message, Exception exception) {
+		super(message, exception);
 	}
+
+	private static final long serialVersionUID = 6321463505225680651L;
 
 }

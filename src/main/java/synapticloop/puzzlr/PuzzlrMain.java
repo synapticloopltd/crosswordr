@@ -1,4 +1,4 @@
-package synapticloop.crosswordr;
+package synapticloop.puzzlr;
 
 /*
  * Copyright (c) 2019 Synapticloop.
@@ -50,11 +50,11 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import synapticloop.crosswordr.crossword.Crossword;
-import synapticloop.crosswordr.exception.CrosswordrException;
+import synapticloop.puzzlr.crossword.Crossword;
+import synapticloop.puzzlr.exception.PuzzlrException;
 
-public class CrosswordrMain {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CrosswordrMain.class);
+public class PuzzlrMain {
+	private static final Logger LOGGER = LoggerFactory.getLogger(PuzzlrMain.class);
 
 	// command line argument
 	private static final String COMMAND_LINE_ARG_DATE_FORMAT = "yyyyMMdd";
@@ -62,7 +62,7 @@ public class CrosswordrMain {
 	private static final String CROSSWORD_TYPE_DATE_DEFAULT = "date";
 	private static final String CROSSWORD_TYPE_NUMBER = "number";
 
-	private static final String CROSSWORDR_JSON = "./crosswordr.json";
+	private static final String PUZZLR_JSON = "./puzzlr.json";
 
 	// all the keys for the JSON parser
 	private static final String JSON_KEY_CROSSWORDS = "crosswords";
@@ -105,7 +105,7 @@ public class CrosswordrMain {
 			currentDate  = Calendar.getInstance().getTime();
 		}
 
-		String crosswordrJson = FileUtils.readFileToString(new File(CROSSWORDR_JSON), Charset.defaultCharset());
+		String crosswordrJson = FileUtils.readFileToString(new File(PUZZLR_JSON), Charset.defaultCharset());
 		JSONObject crosswordrJsonObject = new JSONObject(crosswordrJson);
 		Iterator<Object> crosswordsArrayIterator = crosswordrJsonObject.getJSONArray(JSON_KEY_CROSSWORDS).iterator();
 		while (crosswordsArrayIterator.hasNext()) {
@@ -194,7 +194,7 @@ public class CrosswordrMain {
 				LOGGER.info("Downloading file '{}'", xmlFileName);
 				try {
 					FileUtils.writeStringToFile(xmlFile, crossword.getData(), Charset.defaultCharset());
-				} catch (CrosswordrException ex) {
+				} catch (PuzzlrException ex) {
 					crossword.setIsCorrect(false);
 					LOGGER.error(ex.getMessage(), ex);
 					continue;
@@ -243,7 +243,7 @@ public class CrosswordrMain {
 
 			// Setup XSLT
 			TransformerFactory factory = TransformerFactory.newInstance();
-			InputStream resourceAsStream = CrosswordrMain.class.getResourceAsStream("/" + crossword.getXsl());
+			InputStream resourceAsStream = PuzzlrMain.class.getResourceAsStream("/" + crossword.getXsl());
 
 			Transformer transformer = factory.newTransformer(new StreamSource(resourceAsStream));
 			transformer.setParameter(XSLT_VARIABLE_CROSSWORD_NAME, crossword.getName());
