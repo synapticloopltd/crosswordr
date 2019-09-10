@@ -15,6 +15,5 @@ public class Sudoku extends Puzzle {
 		this.formattedUrl = formattedUrl;
 		this.extractor = extractor;
 		this.xsl = xsl;
-		
 	}
 }

@@ -1,65 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xsl:stylesheet version="1.0"
 		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-		xmlns:fo="http://www.w3.org/1999/XSL/Format"
-		xmlns:cc="http://crossword.info/xml/crossword-compiler"
-		xmlns:cca="http://crossword.info/xml/crossword-compiler-applet"
-		xmlns:rp="http://crossword.info/xml/rectangular-puzzle">
+		xmlns:fo="http://www.w3.org/1999/XSL/Format">
 
 	<xsl:output method="xml" indent="yes"/>
-	<xsl:param name="crosswordName" />
-	<xsl:param name="crosswordIdentifier" />
-	<xsl:param name="crosswordNumber" />
+	<xsl:param name="puzzleName" />
+	<xsl:param name="puzzleIdentifier" />
+	<xsl:param name="puzzleNumber" />
 
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- - 
- - This file generates the crossword, the clues, and the answers.  The page
- - looks like this (landscape mode)
- - +- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
- - | +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  Across              Down             |
- - | | | | | | | | | | | | | | | | | |  1. blah, blah       1. blah, blah    |
- - | +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  1. blah, blah       1. blah, blah    |
- - | | | | | | | | | | | | | | | | | |  1. blah, blah       1. blah, blah    |
- - | +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  1. blah, blah       1. blah, blah    |
- - | | | | | | | | | | | | | | | | | |  1. blah, blah       1. blah, blah    |
- - | +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  1. blah, blah       1. blah, blah    |
- - | | | | | | | | | | | | | | | | | |  1. blah, blah       1. blah, blah    |
- - | +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  1. blah, blah       1. blah, blah    |
- - | | | | | | | | | | | | | | | | | |  1. blah, blah       1. blah, blah    |
- - | +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  1. blah, blah       1. blah, blah    |
- - | | | | | | | | | | | | | | | | | |  1. blah, blah       1. blah, blah    |
- - | +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  1. blah, blah       1. blah, blah    |
- - | | | | | | | | | | | | | | | | | |  1. blah, blah       1. blah, blah    |
- - | +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+  1. blah, blah       1. blah, blah    |
- - |                                                                         |
- - |                                                                         |
- - |                                                        ++++++++++++++++ |
- - |                                                        ++++++++++++++++ |
- - |                                                        ++++++++++++++++ |
- - |                                                        ++++++++++++++++ |
- - |                                                        ++++++++++++++++ |
- - |                                                        ++++++++++++++++ |
- - |                                                        ++++++++++++++++ |
- - |                                                        ++++++++++++++++ |
- - |                                                        ++++++++++++++++ |
- - +- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
- - 
- - XSLT Templates in order in the file:
- - 
- - name: setup-page-sizings
- -         Set up the page sizes for both landscape and portrait mode (A4)
- - name: crossword-title
- -         Generate the crossword title for the page
- - match: /cca:crossword-compiler-applet
- -         Match the XML of the crossword compiler applet namespace
- - match: /cc:crossword-compiler
- -         Match the XML of the crossword compiler namespace
- - name: crossword
- -         
- - 
- - 
- - 
-v - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <!-- 
   Set up the page sizing
   
@@ -89,25 +37,47 @@ v - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	</fo:layout-master-set>
 </xsl:template>
 
-<xsl:template name="crossword-title">
+<xsl:template name="puzzle-title">
 	<fo:block margin-bottom="8mm" border-bottom="solid">
 		<fo:inline font-size="18pt" font-weight="bold" font-family="serif">
-			<xsl:value-of select="$crosswordName" /> 
-			<xsl:if test="$crosswordNumber != -1">
-				(#<xsl:value-of select="$crosswordNumber" />)
+			<xsl:value-of select="$puzzleName" /> 
+			<xsl:if test="$puzzleNumber != -1">
+				(#<xsl:value-of select="$puzzleNumber" />)
 			</xsl:if> - 
 		</fo:inline>
-		<fo:inline font-size="10pt" font-family="serif"><xsl:value-of select="$crosswordIdentifier" /></fo:inline>
+		<fo:inline font-size="10pt" font-family="serif"><xsl:value-of select="$puzzleIdentifier" /></fo:inline>
 	</fo:block>
 </xsl:template>
 
 <!--
-  For those xml crosswords which are applet namespaced - this is the solution
+  xml sudoku format
   -->
-<xsl:template match="/cca:crossword-compiler-applet">
-	<xsl:call-template name="crossword">
-		<xsl:with-param name="crossword-data" select="/cca:crossword-compiler-applet" />
-	</xsl:call-template>
+<xsl:template match="/sudoku">
+	<fo:root>
+		<xsl:call-template name="setup-page-sizings" />
+
+		<fo:page-sequence master-reference="A4-landscape">
+			<xsl:call-template name="puzzle-title" />
+
+			<fo:table border-collapse="collapse">
+		
+				<fo:table-body>
+					<fo:table-row>
+						<fo:table-cell border="solid" border-collapse="collapse" width="7mm" height="7mm" padding-left="0.6mm"  font-size="8pt">
+							<fo:block ><xsl:value-of select="./@number" /></fo:block>
+						</fo:table-cell>
+						<fo:table-cell>
+		
+							<xsl:for-each select="/sudoku/cell">
+								
+							</xsl:for-each>
+						</fo:table-cell>
+					</fo:table-row>
+				</fo:table-body>
+			</fo:table>
+
+		</fo:page-sequence>
+	</fo:root>
 </xsl:template>
 
 <!--
@@ -125,8 +95,10 @@ v - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 	<fo:root>
 		<xsl:call-template name="setup-page-sizings" />
 
-		<fo:page-sequence master-reference="A4-landscape">
-
+<fo:page-sequence master-reference="A4-landscape">
+<!-- 
+   This is the solution to the crossword
+  -->
 <fo:static-content flow-name="xsl-region-after">
 	<xsl:for-each select="$crossword-data/rp:rectangular-puzzle/rp:crossword/rp:grid/rp:cell">
 
@@ -152,23 +124,24 @@ v - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 		</xsl:if>
 	</xsl:for-each>
 </fo:static-content>
+<!--  end of the crossword solution -->
 
-			<!-- 
-			  Start of the blank crossword, and the questions
-			   -->
-			<fo:flow flow-name="xsl-region-body">
+	<!-- 
+	  Start of the blank crossword, and the questions
+	   -->
+	<fo:flow flow-name="xsl-region-body">
 
-				<xsl:call-template name="crossword-title" />
+		<xsl:call-template name="puzzle-title" />
 
-				<xsl:call-template name="table-empty-crossword">
-					<xsl:with-param name="nodes" select="$crossword-data" />
-				</xsl:call-template>
+		<xsl:call-template name="table-empty-crossword">
+			<xsl:with-param name="nodes" select="$crossword-data" />
+		</xsl:call-template>
 
-			</fo:flow>
+	</fo:flow>
 
-		</fo:page-sequence>
+</fo:page-sequence>
 
-	</fo:root>
+</fo:root>
 </xsl:template>
 <!-- 
   This is the Crossword grid
@@ -337,7 +310,7 @@ v - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 						</xsl:otherwise>
 					</xsl:choose>
 
-					<fo:block 1
+					<fo:block 
 							font-size="8pt" 
 							font-weight="bold" 
 							text-align="center" 

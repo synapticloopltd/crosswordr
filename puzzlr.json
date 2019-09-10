@@ -1,5 +1,5 @@
 {
-	"crosswords": [
+	"puzzles": [
 		{
 			"name": "The Canberra Times Cryptic Crossword",
 			"file_name": "the_canberra_times_cryptic_crossword_",
@@ -47,12 +47,12 @@
 			"type": "date"
 		}
 	],
-	"sudokus": [
+	"temp": [
 		{
 			"name": "Evening Standard Daily",
 			"file_name": "evening_standard_daily_sudoku_",
 			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/the-daily-games/the-daily-sudoku/sdk'yyMMdd'.xml'",
-			"extractor": "synapticloop.puzzlr.sudoku.extractor.PassthroughExtractor",
+			"extractor": "synapticloop.puzzlr.sudoku.extractor.XMLPuzzleStringExtractor",
 			"xsl": "sudoku-compiler-landscape.xsl"
 		}
 	]

@@ -59,13 +59,15 @@ public class PuzzlrMain {
 	// command line argument
 	private static final String COMMAND_LINE_ARG_DATE_FORMAT = "yyyyMMdd";
 
-	private static final String CROSSWORD_TYPE_DATE_DEFAULT = "date";
-	private static final String CROSSWORD_TYPE_NUMBER = "number";
+	private static final String PUZZLE_TYPE_DATE_DEFAULT = "date";
+	private static final String PUZZLE_TYPE_NUMBER = "number";
 
 	private static final String PUZZLR_JSON = "./puzzlr.json";
 
 	// all the keys for the JSON parser
-	private static final String JSON_KEY_CROSSWORDS = "crosswords";
+	private static final String JSON_KEY_PUZZLES = "puzzles";
+
+
 	private static final String JSON_KEY_NAME = "name";
 	private static final String JSON_KEY_FILE_NAME = "file_name";
 	private static final String JSON_KEY_URL_FORMAT = "url_format";
@@ -105,17 +107,19 @@ public class PuzzlrMain {
 			currentDate  = Calendar.getInstance().getTime();
 		}
 
-		String crosswordrJson = FileUtils.readFileToString(new File(PUZZLR_JSON), Charset.defaultCharset());
-		JSONObject crosswordrJsonObject = new JSONObject(crosswordrJson);
-		Iterator<Object> crosswordsArrayIterator = crosswordrJsonObject.getJSONArray(JSON_KEY_CROSSWORDS).iterator();
+		String puzzlrJson = FileUtils.readFileToString(new File(PUZZLR_JSON), Charset.defaultCharset());
+		JSONObject puzzlrJsonObject = new JSONObject(puzzlrJson);
+
+
+		Iterator<Object> crosswordsArrayIterator = puzzlrJsonObject.getJSONArray(JSON_KEY_PUZZLES).iterator();
 		while (crosswordsArrayIterator.hasNext()) {
 			Integer crosswordNumber = null;
 			JSONObject crosswordObject = (JSONObject) crosswordsArrayIterator.next();
 
-			String crosswordType = crosswordObject.optString(JSON_KEY_TYPE, CROSSWORD_TYPE_DATE_DEFAULT);
+			String crosswordType = crosswordObject.optString(JSON_KEY_TYPE, PUZZLE_TYPE_DATE_DEFAULT);
 			String urlFormat = crosswordObject.getString(JSON_KEY_URL_FORMAT);
 
-			if(crosswordType.equalsIgnoreCase(CROSSWORD_TYPE_DATE_DEFAULT)) {
+			if(crosswordType.equalsIgnoreCase(PUZZLE_TYPE_DATE_DEFAULT)) {
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(urlFormat);
 				String formattedUrl = simpleDateFormat.format(currentDate );
 
@@ -129,7 +133,7 @@ public class PuzzlrMain {
 								crosswordType
 								)
 						);
-			} else if(crosswordType.equalsIgnoreCase(CROSSWORD_TYPE_NUMBER)){
+			} else if(crosswordType.equalsIgnoreCase(PUZZLE_TYPE_NUMBER)){
 				// add a numeric format now
 				String translateDate = crosswordObject.getString(JSON_KEY_TRANSLATE_DATE);
 				String translateNumber = crosswordObject.getString(JSON_KEY_TRANSLATE_NUMBER);
