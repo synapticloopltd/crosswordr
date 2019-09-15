@@ -16,20 +16,14 @@ package synapticloop.puzzlr.crossword;
  * this source code or binaries.
  */
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import synapticloop.puzzlr.Puzzle;
-import synapticloop.puzzlr.exception.PuzzlrException;
-import synapticloop.puzzlr.extractor.ExtractorBase;
 
 /**
  * 

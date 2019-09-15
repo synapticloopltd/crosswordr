@@ -20,11 +20,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import synapticloop.puzzlr.crossword.extractor.data.Cell;
-import synapticloop.puzzlr.extractor.ExtractorBase;
 
-public class JSONDataToXMLExtractor extends ExtractorBase {
+public class JSONDataToXMLExtractor extends CellBasedExtractor {
+	private static final Logger LOGGER = LoggerFactory.getLogger(JSONDataToXMLExtractor.class);
+
 	private static final String JSON_KEY_NUM_ROWS = "num_rows";
 	private static final String JSON_KEY_NUM_COLUMNS = "num_columns";
 	private static final String JSON_KEY_CELLS = "cells";
@@ -41,11 +44,6 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 
 	private Map<String, String> keyValues = new HashMap<String, String>();
 
-	private Cell[][] cells = new Cell[100][100];
-
-	private int width = -1;
-	private int height = -1;
-
 	@Override
 	public String extract(String data) {
 		JSONObject jsonObject = new JSONObject(data);
@@ -60,6 +58,7 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 			String[] keyValue = parameter.split("=");
 			keyValues.put(keyValue[0], keyValue[1]);
 		}
+		LOGGER.info("Got data: {}", urlData);
 		// now that we have all of the values, time to generate the xml file
 		height = Integer.valueOf(keyValues.get(JSON_KEY_NUM_ROWS));
 		width = Integer.valueOf(keyValues.get(JSON_KEY_NUM_COLUMNS));
@@ -142,137 +141,5 @@ public class JSONDataToXMLExtractor extends ExtractorBase {
 				}
 			}
 		}
-	}
-
-	private String generateXML() {
-		StringBuffer stringBuffer = new StringBuffer();
-		stringBuffer.append(
-				"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + 
-						"<crossword-compiler xmlns=\"http://crossword.info/xml/crossword-compiler\">\n" + 
-						"  <rectangular-puzzle xmlns=\"http://crossword.info/xml/rectangular-puzzle\" alphabet=\"ABCDEFGHIJKLMNOPQRSTUVWXYZ\">\n" + 
-						"    <metadata>\n" + 
-						"      <title />\n" + 
-						"      <creator />\n" + 
-						"      <copyright />\n" + 
-						"      <description />\n" + 
-						"    </metadata>\n" + 
-						"    <crossword>\n" + 
-						"      <grid width=\"" + width + "\" height=\"" + height + "\">\n");
-
-		// now for the cells
-		int x = 0;
-		int y = 0;
-
-		boolean keepPrinting = true;
-
-		while(keepPrinting) {
-			Cell cell = cells[x][y];
-			if(null != cell) {
-				stringBuffer.append(
-						"<cell x=\"" + 
-								(x + 1) + 
-								"\" y=\"" + 
-								(y + 1) + 
-								"\" solution=\"" + 
-								cell.getCharacter() +
-						"\"");
-				if(null != cell.getNumber()) {
-					stringBuffer.append(" number=\"");
-					stringBuffer.append(cell.getNumber());
-					stringBuffer.append("\"");
-				}
-				stringBuffer.append("/>\n");
-			} else {
-				stringBuffer.append("<cell x=\"" + (x + 1) + "\" y=\"" + (y + 1) + "\" type=\"block\" />\n");
-			}
-			y++;
-
-			if(y == width) {
-				x++;
-				y = 0;
-				if(x == height) {
-					keepPrinting = false;
-				}
-			}
-		}
-
-		stringBuffer.append(
-				"      </grid>\n" +
-						"      <clues ordering=\"normal\">\n" + 
-						"        <title>\n" + 
-						"          <b>Across</b>\n" + 
-				"        </title>\n");
-
-		x = 0;
-		y = 0;
-
-		boolean keepGoing = true;
-		while(keepGoing) {
-			Cell cell = cells[x][y];
-			if(null != cell) {
-				if(null != cell.getAcrossClue()) {
-					stringBuffer.append(
-							"<clue number=\"" + 
-									cell.getNumber()+ 
-									"\" format=\"\">" + 
-									cell.getAcrossClue() + 
-							"</clue>\n");
-				}
-			}
-
-			x++;
-
-			if(x == width) {
-				y++;
-				x = 0;
-
-				if(y == height) {
-					keepGoing = false;
-				}
-			}
-		}
-
-		stringBuffer.append(
-				"      </clues>\n" + 
-						"      <clues ordering=\"normal\">\n" + 
-						"        <title>\n" + 
-						"          <b>Down</b>\n" + 
-				"        </title>\n");
-
-		x = 0;
-		y = 0;
-
-		keepGoing = true;
-		while(keepGoing) {
-			Cell cell = cells[x][y];
-			if(null != cell) {
-				if(null != cell.getDownClue()) {
-					stringBuffer.append(
-							"<clue number=\"" + 
-									cell.getNumber()+ 
-									"\" format=\"\">" + 
-									cell.getDownClue() + 
-							"</clue>\n");
-				}
-			}
-
-			x++;
-
-			if(x == width) {
-				y++;
-				x = 0;
-
-				if(y == height) {
-					keepGoing = false;
-				}
-			}
-		}
-
-		stringBuffer.append(
-				"      </clues>\n" + 
-						"    </crossword>\n" + 
-						"  </rectangular-puzzle>\n" + 
-				"</crossword-compiler>\n");
-		return(stringBuffer.toString());
 	}
 }

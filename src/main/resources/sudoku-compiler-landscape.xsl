@@ -30,9 +30,6 @@
 				margin-bottom="0.5cm">
 			<fo:region-body/>
 
-			<!-- This is for the crossword answers -->
-			<fo:region-after extent="7.0cm" reference-orientation="180"/>
-
 		</fo:simple-page-master>
 	</fo:layout-master-set>
 </xsl:template>
@@ -57,277 +54,35 @@
 		<xsl:call-template name="setup-page-sizings" />
 
 		<fo:page-sequence master-reference="A4-landscape">
+			<fo:flow flow-name="xsl-region-body">
 			<xsl:call-template name="puzzle-title" />
 
 			<fo:table border-collapse="collapse">
 		
 				<fo:table-body>
-					<fo:table-row>
-						<fo:table-cell border="solid" border-collapse="collapse" width="7mm" height="7mm" padding-left="0.6mm"  font-size="8pt">
-							<fo:block ><xsl:value-of select="./@number" /></fo:block>
-						</fo:table-cell>
-						<fo:table-cell>
-		
-							<xsl:for-each select="/sudoku/cell">
-								
+
+					<xsl:for-each select="row">
+						<fo:table-row>
+
+							<xsl:for-each select="cell">
+								<fo:table-cell border="solid" border-collapse="collapse" width="7mm" height="7mm" padding-left="0.6mm" text-align="center" font-size="14pt" display-align="after">
+									<fo:block >
+										<xsl:if test="@show = 'True'">
+											<xsl:value-of select="@value" />
+										</xsl:if>
+									</fo:block>
+								</fo:table-cell>
+
 							</xsl:for-each>
-						</fo:table-cell>
-					</fo:table-row>
+
+						</fo:table-row>
+					</xsl:for-each>
+
 				</fo:table-body>
 			</fo:table>
-
+			</fo:flow>
 		</fo:page-sequence>
 	</fo:root>
 </xsl:template>
 
-<!--
-  For those xml crosswords which are normally namespaced - this is the solution
-  -->
-<xsl:template match="/cc:crossword-compiler">
-	<xsl:call-template name="crossword">
-		<xsl:with-param name="crossword-data" select="/cc:crossword-compiler" />
-	</xsl:call-template>
-</xsl:template>
-
-<xsl:template name="crossword">
-	<xsl:param name="crossword-data" />
-
-	<fo:root>
-		<xsl:call-template name="setup-page-sizings" />
-
-<fo:page-sequence master-reference="A4-landscape">
-<!-- 
-   This is the solution to the crossword
-  -->
-<fo:static-content flow-name="xsl-region-after">
-	<xsl:for-each select="$crossword-data/rp:rectangular-puzzle/rp:crossword/rp:grid/rp:cell">
-
-		<xsl:if test="@x = 1">
-			<fo:block font-size="4pt">
-				<fo:table border-collapse="collapse" border-color="#444444">
-
-					<fo:table-body>
-						<fo:table-row>
-
-							<xsl:call-template name="table-row-solution">
-								<xsl:with-param name="nodes" select="$crossword-data" />
-								<xsl:with-param name="position" select="position()" />
-							</xsl:call-template>
-
-							<fo:table-cell><!-- EMPTY - TO FORCE RIGHT ALIGN --><fo:block /></fo:table-cell>
-
-						</fo:table-row>
-					</fo:table-body>
-				</fo:table>
-			</fo:block>
-
-		</xsl:if>
-	</xsl:for-each>
-</fo:static-content>
-<!--  end of the crossword solution -->
-
-	<!-- 
-	  Start of the blank crossword, and the questions
-	   -->
-	<fo:flow flow-name="xsl-region-body">
-
-		<xsl:call-template name="puzzle-title" />
-
-		<xsl:call-template name="table-empty-crossword">
-			<xsl:with-param name="nodes" select="$crossword-data" />
-		</xsl:call-template>
-
-	</fo:flow>
-
-</fo:page-sequence>
-
-</fo:root>
-</xsl:template>
-<!-- 
-  This is the Crossword grid
-  -->
-<xsl:template name="table-row">
-	<xsl:param name = "position" />
-	<xsl:param name = "nodes" />
-
-	<xsl:variable name="width" select="$nodes/rp:rectangular-puzzle/rp:crossword/rp:grid/@width" />
-	<xsl:variable name="height" select="$nodes/rp:rectangular-puzzle/rp:crossword/rp:grid/@height" />
-
-	<xsl:for-each select="$nodes/rp:rectangular-puzzle/rp:crossword/rp:grid/rp:cell[@y = ((($position -1) mod $height) + 1)]">
-		<xsl:choose>
-			<xsl:when test="$width > 17">
-			<xsl:variable name="boxWidth"><xsl:value-of select="8 - ($width - 17) + 1" />mm</xsl:variable>
-
-				<xsl:choose>
-					<xsl:when test="not(count(./@type) = 0)">
-						<fo:table-cell border="solid" border-collapse="collapse" width="7mm" height="7mm" background-color="black">
-							<fo:block />
-						</fo:table-cell>
-					</xsl:when>
-					<xsl:otherwise>
-						<fo:table-cell border="solid" border-collapse="collapse" width="7mm" height="7mm" padding-left="0.6mm"  font-size="8pt">
-							<fo:block ><xsl:value-of select="./@number" /></fo:block>
-						</fo:table-cell>
-					</xsl:otherwise>
-				</xsl:choose>
-
-			</xsl:when>
-			<xsl:otherwise>
-
-				<xsl:choose>
-					<xsl:when test="not(count(./@type) = 0)">
-						<fo:table-cell border="solid" border-collapse="collapse" width="8mm" height="8mm" background-color="black">
-							<fo:block />
-						</fo:table-cell>
-					</xsl:when>
-					<xsl:otherwise>
-						<fo:table-cell border="solid" border-collapse="collapse" width="8mm" height="8mm" padding-left="0.6mm"  font-size="8pt">
-							<fo:block ><xsl:value-of select="./@number" /></fo:block>
-						</fo:table-cell>
-					</xsl:otherwise>
-				</xsl:choose>
-
-			</xsl:otherwise>
-
-
-		</xsl:choose>
-
-	</xsl:for-each>
-
-</xsl:template>
-
-<!-- 
-  Now for the empty table
-  -->
-<xsl:template name="table-empty-crossword">
-	<xsl:param name = "nodes" />
-
-	<xsl:variable name="width" select="$nodes/rp:rectangular-puzzle/rp:crossword/rp:grid/@width" />
-	<xsl:variable name="height" select="$nodes/rp:rectangular-puzzle/rp:crossword/rp:grid/@height" />
-
-	<fo:table border-collapse="collapse">
-
-		<fo:table-body>
-			<fo:table-row>
-				<fo:table-cell>
-
-					<xsl:for-each select="$nodes/rp:rectangular-puzzle/rp:crossword/rp:grid/rp:cell">
-
-						<xsl:if test="@x = 1">
-
-							<fo:block font-size="10pt">
-								<fo:table border-collapse="collapse">
-
-									<fo:table-body>
-										<fo:table-row>
-
-											<xsl:call-template name="table-row">
-												<xsl:with-param name="position" select="position()" />
-												<xsl:with-param name="nodes" select="$nodes" />
-											</xsl:call-template>
-
-										</fo:table-row>
-									</fo:table-body>
-								</fo:table>
-							</fo:block>
-
-						</xsl:if>
-					</xsl:for-each>
-				</fo:table-cell>
-
-				<fo:table-cell font-size="8pt">
-					<fo:block>
-					<fo:table border-collapse="collapse">
-						<fo:table-body>
-							<fo:table-row>
-								<xsl:for-each select="$nodes/rp:rectangular-puzzle/rp:crossword/rp:clues">
-									<fo:table-cell border-collapse="collapse" margin-right="2mm">
-										<fo:block font-weight="bold">
-											<xsl:value-of select="./rp:title" />
-										</fo:block>
-
-										<fo:table border-collapse="collapse">
-											<fo:table-body>
-												<xsl:for-each select="./rp:clue">
-													<fo:table-row>
-														<fo:table-cell>
-															<xsl:choose>
-																<xsl:when test="@format = ''">
-																	<fo:block><xsl:value-of select="@number" />. <xsl:value-of select="." /></fo:block>
-																</xsl:when>
-																<xsl:otherwise>
-																	<fo:block><xsl:value-of select="@number" />. <xsl:value-of select="." /> (<xsl:value-of select="@format" />)</fo:block>
-																</xsl:otherwise>
-															</xsl:choose>
-														</fo:table-cell>
-													</fo:table-row>
-												</xsl:for-each>
-											</fo:table-body>
-										</fo:table>
-									</fo:table-cell>
-
-								</xsl:for-each>
-							</fo:table-row>
-
-						</fo:table-body>
-					</fo:table>
-				</fo:block>
-			</fo:table-cell>
-		</fo:table-row>
-	</fo:table-body>
-	</fo:table>
-</xsl:template>
-
-<!--
-	Now for the solution grid
-	-->
-<xsl:template name="table-row-solution">
-	<xsl:param name = "nodes" />
-	<xsl:param name = "position" />
-
-	<xsl:variable name="width" select="$nodes/rp:rectangular-puzzle/rp:crossword/rp:grid/@width" />
-	<xsl:variable name="height" select="$nodes/rp:rectangular-puzzle/rp:crossword/rp:grid/@height" />
-
-	<xsl:for-each select="$nodes/rp:rectangular-puzzle/rp:crossword/rp:grid/rp:cell[@y = ((($position -1) mod $height) + 1)]">
-
-		<xsl:choose>
-			<xsl:when test="not(count(./@type) = 0)">
-				<fo:table-cell border="solid" border-collapse="collapse" width="4mm" height="4mm" background-color="#999999" border-color="#999999">
-					<fo:block />
-				</fo:table-cell>
-			</xsl:when>
-			<xsl:otherwise>
-				<fo:table-cell border="solid" border-collapse="collapse" width="4mm" height="4mm" padding-left="0.6mm" border-color="#999999">
-
-					<xsl:choose>
-						<xsl:when test="count(./@number) = 0">
-							<fo:block color="white">1</fo:block>
-						</xsl:when>
-						<xsl:otherwise>
-							<fo:block color="#999999">
-								<xsl:value-of select="./@number" />
-							</fo:block>
-						</xsl:otherwise>
-					</xsl:choose>
-
-					<fo:block 
-							font-size="8pt" 
-							font-weight="bold" 
-							text-align="center" 
-							margin-top="-1mm" 
-							margin-bottom="0" 
-							margin-left="0mm" 
-							padding="0"
-							color="#999999"
-							font-family="monospace">
-						<xsl:value-of select="./@solution" />
-					</fo:block>
-
-				</fo:table-cell>
-			</xsl:otherwise>
-		</xsl:choose>
-
-	</xsl:for-each>
-
-</xsl:template>
 </xsl:stylesheet>

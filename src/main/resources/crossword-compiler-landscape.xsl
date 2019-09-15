@@ -337,7 +337,7 @@ v - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 						</xsl:otherwise>
 					</xsl:choose>
 
-					<fo:block 1
+					<fo:block
 							font-size="8pt" 
 							font-weight="bold" 
 							text-align="center" 

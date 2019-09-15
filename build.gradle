@@ -65,7 +65,7 @@ configurations.all {
 }
 
 
-mainClassName = "synapticloop.crosswordr.CrosswordrMain"
+mainClassName = "synapticloop.puzzlr.PuzzlrMain"
 
 jar {
 	manifest {

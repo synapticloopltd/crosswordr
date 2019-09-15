@@ -19,24 +19,33 @@ public class XMLPuzzleStringExtractor extends ExtractorBase {
 		String[] split = puzzleString.split(";");
 		for (String cell : split) {
 			String[] cells = cell.split(",");
-				stringBuffer.append("<cell");
-				stringBuffer.append(" x=\"");
-				stringBuffer.append(cells[1]);
-				stringBuffer.append("\"");
-				stringBuffer.append(" y=\"");
-				stringBuffer.append(cells[0]);
-				stringBuffer.append("\"");
 
-				stringBuffer.append(" show=\"");
-				stringBuffer.append(cells[4]);
-				stringBuffer.append("\"");
-				stringBuffer.append(" value=\"");
-				stringBuffer.append(cells[5]);
-				stringBuffer.append("\" />\n");
+			String x = cells[1];
+			String y = cells[0];
+			if(y.equals("1")) {
+				stringBuffer.append("<row>\n");
+			}
+
+			stringBuffer.append("  <cell");
+			stringBuffer.append(" x=\"");
+			stringBuffer.append(x);
+			stringBuffer.append("\"");
+			stringBuffer.append(" y=\"");
+			stringBuffer.append(y);
+			stringBuffer.append("\"");
+
+			stringBuffer.append(" show=\"");
+			stringBuffer.append(cells[4]);
+			stringBuffer.append("\"");
+			stringBuffer.append(" value=\"");
+			stringBuffer.append(cells[5]);
+			stringBuffer.append("\" />\n");
+			if(y.equals("9")) {
+				stringBuffer.append("</row>\n");
+			}
 		}
 		stringBuffer.append("</sudoku>\n");
 		System.out.println(stringBuffer.toString());
-		System.exit(-1);
 		return(stringBuffer.toString());
 	}
 

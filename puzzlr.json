@@ -1,6 +1,25 @@
 {
 	"puzzles": [
 		{
+			"name": "Evening Standard Daily",
+			"file_name": "evening_standard_daily_sudoku_",
+			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/the-daily-games/the-daily-sudoku/sdk'yyMMdd'.xml'",
+			"extractor": "synapticloop.puzzlr.sudoku.extractor.XMLPuzzleStringExtractor",
+			"xsl": "sudoku-compiler-landscape.xsl"
+		}
+	],
+	"temp": [
+		{
+			"name": "The Guardian Online Cryptic Crossword",
+			"file_name": "the_guardian_online_cryptic_crossword_",
+			"url_format": "https://www.theguardian.com/crosswords/cryptic/%d",
+			"extractor": "synapticloop.puzzlr.crossword.extractor.TheGuardianHTMLExtractor",
+			"xsl": "crossword-compiler-landscape.xsl",
+			"type": "number",
+			"translateDate": "20190913",
+			"translateNumber": "27925"
+		},
+		{
 			"name": "The Canberra Times Cryptic Crossword",
 			"file_name": "the_canberra_times_cryptic_crossword_",
 			"url_format": "'https://data.puzzlexperts.com/puzzleapp-v3/data.php?psid=100000842&date='yyyy-MM-dd",
@@ -45,15 +64,6 @@
 			"extractor": "synapticloop.puzzlr.crossword.extractor.PassthroughExtractor",
 			"xsl": "crossword-compiler-landscape.xsl",
 			"type": "date"
-		}
-	],
-	"temp": [
-		{
-			"name": "Evening Standard Daily",
-			"file_name": "evening_standard_daily_sudoku_",
-			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/the-daily-games/the-daily-sudoku/sdk'yyMMdd'.xml'",
-			"extractor": "synapticloop.puzzlr.sudoku.extractor.XMLPuzzleStringExtractor",
-			"xsl": "sudoku-compiler-landscape.xsl"
 		}
 	]
 }
