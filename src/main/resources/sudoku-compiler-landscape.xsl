@@ -65,13 +65,31 @@
 						<fo:table-row>
 
 							<xsl:for-each select="cell">
-								<fo:table-cell border="solid" border-collapse="collapse" width="7mm" height="7mm" padding-left="0.6mm" text-align="center" font-size="14pt" display-align="after">
-									<fo:block >
-										<xsl:if test="@show = 'True'">
-											<xsl:value-of select="@value" />
-										</xsl:if>
-									</fo:block>
-								</fo:table-cell>
+								<xsl:choose>
+									<xsl:when test="((@y=4 or @y=5 or @y=6) and (@x=4 or @x=5 or @x=6)) or ((@x=1 or @x=2 or @x=3 or @x=7 or @x=8 or @x=9) and (@y = 1 or @y = 2 or @y=3 or @y=7 or @y=8 or @y=9))">
+
+										<fo:table-cell border="solid" border-width="1.6px" border-collapse="collapse" width="7mm" height="7mm" padding-left="0.6mm" 
+												text-align="center" font-size="14pt" display-align="after" background-color="#dddddd">
+											<fo:block >
+												<xsl:if test="@show = 'True'">
+													<xsl:value-of select="@value" />
+												</xsl:if>
+											</fo:block>
+										</fo:table-cell>
+
+									</xsl:when>
+									<xsl:otherwise>
+
+										<fo:table-cell border="solid" border-collapse="collapse" width="7mm" height="7mm" padding-left="0.6mm" text-align="center" font-size="14pt" display-align="after">
+											<fo:block >
+												<xsl:if test="@show = 'True'">
+													<xsl:value-of select="@value" />
+												</xsl:if>
+											</fo:block>
+										</fo:table-cell>
+
+									</xsl:otherwise>
+								</xsl:choose>
 
 							</xsl:for-each>
 

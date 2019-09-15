@@ -1,6 +1,6 @@
 package synapticloop.puzzlr.extractor.crossword;
 
-import synapticloop.puzzlr.extractor.ExtractorBase;
+import synapticloop.puzzlr.extractor.BaseExtractor;
 
 /*
  * Copyright (c) 2019 Synapticloop.
@@ -18,7 +18,7 @@ import synapticloop.puzzlr.extractor.ExtractorBase;
  * this source code or binaries.
  */
 
-public class JavascriptExtractor extends ExtractorBase {
+public class JavascriptExtractor extends BaseExtractor {
 
 	@Override
 	public String extract(String data) {

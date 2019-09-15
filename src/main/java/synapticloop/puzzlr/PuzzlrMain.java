@@ -77,11 +77,11 @@ public class PuzzlrMain {
 	private static final String JSON_KEY_TRANSLATE_NUMBER = "translateNumber";
 
 	// all the XSLT variables that we are pumping into the template
-	private static final String XSLT_VARIABLE_CROSSWORD_NAME = "crosswordName";
-	private static final String XSLT_VARIABLE_CROSSWORD_NUMBER = "crosswordNumber";
-	private static final String XSLT_VARIABLE_CROSSWORD_IDENTIFIER = "crosswordIdentifier";
+	private static final String XSLT_VARIABLE_PUZZLE_NAME = "crosswordName";
+	private static final String XSLT_VARIABLE_PUZZLE_NUMBER = "crosswordNumber";
+	private static final String XSLT_VARIABLE_PUZZLE_IDENTIFIER = "crosswordIdentifier";
 
-	private static List<Puzzle> crosswords = new ArrayList<Puzzle>();
+	private static List<Puzzle> puzzles = new ArrayList<Puzzle>();
 
 	private static List<String> GENERATED_FILES = new ArrayList<String>();
 
@@ -122,7 +122,7 @@ public class PuzzlrMain {
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(urlFormat);
 				String formattedUrl = simpleDateFormat.format(currentDate );
 
-				crosswords.add(
+				puzzles.add(
 						new Puzzle(
 								crosswordObject.getString(JSON_KEY_NAME), 
 								crosswordObject.getString(JSON_KEY_FILE_NAME), 
@@ -154,7 +154,7 @@ public class PuzzlrMain {
 						translateNumber
 						);
 				crossword.setPuzzleNumber(crosswordNumber);
-				crosswords.add(
+				puzzles.add(
 						crossword
 						);
 			} else {
@@ -165,7 +165,7 @@ public class PuzzlrMain {
 		// check to see whether we have a duplicate URL
 		boolean hasDuplicate = false;
 		Set<String> urls = new HashSet<String>();
-		for (Puzzle crossword : crosswords) {
+		for (Puzzle crossword : puzzles) {
 			String formattedUrl = crossword.getFormattedUrl();
 			if(urls.contains(formattedUrl)) {
 				LOGGER.error("Crossword already contains url '{}'", formattedUrl);
@@ -190,7 +190,7 @@ public class PuzzlrMain {
 	 * @throws IOException if there was an error writing the file
 	 */
 	private static void writeXmlFilesAndMerge() throws IOException {
-		for (Puzzle crossword : crosswords) {
+		for (Puzzle crossword : puzzles) {
 			String xmlFileName = "./output/xml/" + crossword.getFileName()  + new SimpleDateFormat("yyyy-MM-dd").format(currentDate ) + ".xml";
 			File xmlFile = new File(xmlFileName);
 			if(!xmlFile.exists()) {
@@ -249,12 +249,12 @@ public class PuzzlrMain {
 			InputStream resourceAsStream = PuzzlrMain.class.getResourceAsStream("/" + crossword.getXsl());
 
 			Transformer transformer = factory.newTransformer(new StreamSource(resourceAsStream));
-			transformer.setParameter(XSLT_VARIABLE_CROSSWORD_NAME, crossword.getName());
-			transformer.setParameter(XSLT_VARIABLE_CROSSWORD_IDENTIFIER, new SimpleDateFormat("dd MMMM yyyy").format(currentDate));
+			transformer.setParameter(XSLT_VARIABLE_PUZZLE_NAME, crossword.getName());
+			transformer.setParameter(XSLT_VARIABLE_PUZZLE_IDENTIFIER, new SimpleDateFormat("dd MMMM yyyy").format(currentDate));
 			if(null != number) {
-				transformer.setParameter(XSLT_VARIABLE_CROSSWORD_NUMBER, number);
+				transformer.setParameter(XSLT_VARIABLE_PUZZLE_NUMBER, number);
 			} else {
-				transformer.setParameter(XSLT_VARIABLE_CROSSWORD_NUMBER, -1);
+				transformer.setParameter(XSLT_VARIABLE_PUZZLE_NUMBER, -1);
 			}
 
 			// Resulting SAX events (the generated FO) must be piped through to FOP

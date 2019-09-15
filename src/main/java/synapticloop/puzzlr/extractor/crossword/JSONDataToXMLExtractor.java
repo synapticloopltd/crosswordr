@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 import synapticloop.puzzlr.extractor.crossword.data.Cell;
 
-public class JSONDataToXMLExtractor extends CellBasedExtractor {
+public class JSONDataToXMLExtractor extends BaseCellExtractor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JSONDataToXMLExtractor.class);
 
 	private static final String JSON_KEY_NUM_ROWS = "num_rows";

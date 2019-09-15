@@ -24,7 +24,7 @@ import org.json.JSONObject;
 import synapticloop.puzzlr.extractor.crossword.data.Cell;
 
 
-public class TheGuardianHTMLExtractor extends CellBasedExtractor {
+public class TheGuardianHTMLExtractor extends BaseCellExtractor {
 	private static final String START_DATA_CROSSWORD_DATA = "data-crossword-data=\"";
 
 	@Override

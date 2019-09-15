@@ -1,9 +1,9 @@
 package synapticloop.puzzlr.extractor.crossword;
 
-import synapticloop.puzzlr.extractor.ExtractorBase;
+import synapticloop.puzzlr.extractor.BaseExtractor;
 import synapticloop.puzzlr.extractor.crossword.data.Cell;
 
-public abstract class CellBasedExtractor extends ExtractorBase {
+public abstract class BaseCellExtractor extends BaseExtractor {
 	protected Cell[][] cells = new Cell[100][100];
 
 	protected int width = -1;

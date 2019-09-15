@@ -16,6 +16,6 @@ package synapticloop.puzzlr.extractor;
  * this source code or binaries.
  */
 
-public abstract class ExtractorBase {
+public abstract class BaseExtractor {
 	public abstract String extract(String data);
 }

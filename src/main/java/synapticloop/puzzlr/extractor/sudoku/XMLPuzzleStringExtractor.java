@@ -4,9 +4,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 
-import synapticloop.puzzlr.extractor.ExtractorBase;
+import synapticloop.puzzlr.extractor.BaseExtractor;
 
-public class XMLPuzzleStringExtractor extends ExtractorBase {
+public class XMLPuzzleStringExtractor extends BaseExtractor {
 
 	@Override
 	public String extract(String data) {

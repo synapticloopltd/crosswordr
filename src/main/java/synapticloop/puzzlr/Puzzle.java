@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import synapticloop.puzzlr.exception.PuzzlrException;
-import synapticloop.puzzlr.extractor.ExtractorBase;
+import synapticloop.puzzlr.extractor.BaseExtractor;
 
 public class Puzzle {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Puzzle.class);
@@ -68,9 +68,9 @@ public class Puzzle {
 	 */
 	public String getData() throws PuzzlrException {
 		// first get the extractor
-		ExtractorBase extractorBase = null;
+		BaseExtractor extractorBase = null;
 		try {
-			extractorBase = (ExtractorBase)Class.forName(extractor).getDeclaredConstructor().newInstance();
+			extractorBase = (BaseExtractor)Class.forName(extractor).getDeclaredConstructor().newInstance();
 		} catch (InstantiationException | 
 				IllegalAccessException | 
 				IllegalArgumentException | 
