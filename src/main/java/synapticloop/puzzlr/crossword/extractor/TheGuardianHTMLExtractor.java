@@ -36,6 +36,7 @@ public class TheGuardianHTMLExtractor extends CellBasedExtractor {
 	}
 
 	private String parseJSONToXML(JSONObject crosswordObject) {
+		System.out.println(crosswordObject.toString(2));
 		// time to generate the cells
 		width = crosswordObject.getJSONObject("dimensions").getInt("rows");
 		height = crosswordObject.getJSONObject("dimensions").getInt("cols");
@@ -60,7 +61,7 @@ public class TheGuardianHTMLExtractor extends CellBasedExtractor {
 						cell.setAcrossClue(clue);
 						cell.setCharacter(solution.charAt(j));
 						cell.setLength(solution.length());
-						cell.setNumber(Integer.parseInt(entryObject.getString("humanNumber")));
+						cell.setNumber(entryObject.getString("humanNumber"));
 					} else {
 						cell.setCharacter(solution.charAt(j));
 					}
@@ -77,7 +78,7 @@ public class TheGuardianHTMLExtractor extends CellBasedExtractor {
 						cell.setDownClue(clue);
 						cell.setCharacter(solution.charAt(j));
 						cell.setLength(solution.length());
-						cell.setNumber(Integer.parseInt(entryObject.getString("humanNumber")));
+						cell.setNumber(entryObject.getString("humanNumber"));
 					} else {
 						cell.setCharacter(solution.charAt(j));
 					}

@@ -125,7 +125,7 @@ public class JSONDataToXMLExtractor extends CellBasedExtractor {
 			Cell cell = cells[x][y];
 			if(null != cell) {
 				if(null != cell.getAcrossClue() || null != cell.getDownClue()) {
-					cell.setNumber(numClue);
+					cell.setNumber(numClue + "");
 					numClue++;
 				}
 			}

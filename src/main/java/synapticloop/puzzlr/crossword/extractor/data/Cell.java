@@ -17,7 +17,7 @@ package synapticloop.puzzlr.crossword.extractor.data;
  */
 
 public class Cell {
-	Integer number = null;
+	String number = null;
 	String acrossClue = null;
 	String downClue = null;
 	Character character = null;
@@ -26,9 +26,9 @@ public class Cell {
 	public Cell() {
 	}
 
-	public Integer getNumber() { return number; }
+	public String getNumber() { return number; }
 
-	public void setNumber(Integer number) { this.number = number; }
+	public void setNumber(String number) { this.number = number; }
 
 	public Integer getLength() { return length; }
 

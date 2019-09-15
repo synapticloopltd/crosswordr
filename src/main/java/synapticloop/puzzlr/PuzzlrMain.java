@@ -50,7 +50,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import synapticloop.puzzlr.crossword.Crossword;
 import synapticloop.puzzlr.exception.PuzzlrException;
 
 public class PuzzlrMain {
@@ -124,7 +123,7 @@ public class PuzzlrMain {
 				String formattedUrl = simpleDateFormat.format(currentDate );
 
 				crosswords.add(
-						new Crossword(
+						new Puzzle(
 								crosswordObject.getString(JSON_KEY_NAME), 
 								crosswordObject.getString(JSON_KEY_FILE_NAME), 
 								formattedUrl, 
@@ -144,7 +143,7 @@ public class PuzzlrMain {
 
 				crosswordNumber = parseInt + numDaysDifference;
 				String formattedUrl = String.format(urlFormat, crosswordNumber);
-				Crossword crossword = new Crossword(
+				Puzzle crossword = new Puzzle(
 						crosswordObject.getString(JSON_KEY_NAME), 
 						crosswordObject.getString(JSON_KEY_FILE_NAME), 
 						formattedUrl, 
@@ -154,7 +153,7 @@ public class PuzzlrMain {
 						translateDate,
 						translateNumber
 						);
-				crossword.setCrosswordNumber(crosswordNumber);
+				crossword.setPuzzleNumber(crosswordNumber);
 				crosswords.add(
 						crossword
 						);

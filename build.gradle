@@ -15,8 +15,8 @@ plugins {
 }
 
 group = 'synapticloop'
-archivesBaseName = 'crosswords'
-description = """crossword-compiler -> PDF"""
+archivesBaseName = 'puzzlr'
+description = """puzzle-compiler -> PDF"""
 
 version = '1.0.0'
 
@@ -69,7 +69,7 @@ mainClassName = "synapticloop.puzzlr.PuzzlrMain"
 
 jar {
 	manifest {
-		attributes("Main-Class": "synapticloop.crosswordr.CrosswordrMain", "Implementation-Version": version)
+		attributes("Main-Class": "synapticloop.puzzlr.PuzzlrMain", "Implementation-Version": version)
 	}
 }
 
