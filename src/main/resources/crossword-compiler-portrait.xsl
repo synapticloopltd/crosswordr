@@ -7,9 +7,9 @@
 		xmlns:rp="http://crossword.info/xml/rectangular-puzzle">
 
 	<xsl:output method="xml" indent="yes"/>
-	<xsl:param name="crosswordName" />
-	<xsl:param name="crosswordIdentifier" />
-	<xsl:param name="crosswordNumber" />
+	<xsl:param name="puzzleName" />
+	<xsl:param name="puzzleIdentifier" />
+	<xsl:param name="puzzleNumber" />
 
 <!-- 
   Set up the page sizing
@@ -39,12 +39,12 @@
 <xsl:template name="crossword-title">
 	<fo:block margin-bottom="8mm" border-bottom="solid">
 		<fo:inline font-size="18pt" font-weight="bold" font-family="serif">
-			<xsl:value-of select="$crosswordName" /> 
-			<xsl:if test="$crosswordNumber != -1">
-				(#<xsl:value-of select="$crosswordNumber" />)
+			<xsl:value-of select="$puzzleName" /> 
+			<xsl:if test="$puzzleNumber != -1">
+				(#<xsl:value-of select="$puzzleNumber" />)
 			</xsl:if> - 
 		</fo:inline>
-		<fo:inline font-size="10pt" font-family="serif"><xsl:value-of select="$crosswordIdentifier" /></fo:inline>
+		<fo:inline font-size="10pt" font-family="serif"><xsl:value-of select="$puzzleIdentifier" /></fo:inline>
 	</fo:block>
 </xsl:template>
 

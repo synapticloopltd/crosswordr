@@ -1,7 +1,16 @@
 {
+	"puzzles2": [
+	],
 	"puzzles": [
 		{
-			"name": "Evening Standard Daily",
+			"name": "The Canberra Times Sudoku",
+			"file_name": "the_canberra_times_sudoku_",
+			"url_format": "'https://data.puzzlexperts.com/puzzleapp/data.php?psid=100000822&date='yyyy-MM-dd",
+			"extractor": "synapticloop.puzzlr.extractor.sudoku.JSONPuzzleStringExtractor",
+			"xsl": "sudoku-compiler-landscape.xsl"
+		},
+		{
+			"name": "Evening Standard Daily Sudoku",
 			"file_name": "evening_standard_daily_sudoku_",
 			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/the-daily-games/the-daily-sudoku/sdk'yyMMdd'.xml'",
 			"extractor": "synapticloop.puzzlr.extractor.sudoku.XMLPuzzleStringExtractor",

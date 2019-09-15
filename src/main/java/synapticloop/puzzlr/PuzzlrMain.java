@@ -77,9 +77,9 @@ public class PuzzlrMain {
 	private static final String JSON_KEY_TRANSLATE_NUMBER = "translateNumber";
 
 	// all the XSLT variables that we are pumping into the template
-	private static final String XSLT_VARIABLE_PUZZLE_NAME = "crosswordName";
-	private static final String XSLT_VARIABLE_PUZZLE_NUMBER = "crosswordNumber";
-	private static final String XSLT_VARIABLE_PUZZLE_IDENTIFIER = "crosswordIdentifier";
+	private static final String XSLT_VARIABLE_PUZZLE_NAME = "puzzleName";
+	private static final String XSLT_VARIABLE_PUZZLE_NUMBER = "puzzleNumber";
+	private static final String XSLT_VARIABLE_PUZZLE_IDENTIFIER = "puzzleIdentifier";
 
 	private static List<Puzzle> puzzles = new ArrayList<Puzzle>();
 
@@ -110,72 +110,72 @@ public class PuzzlrMain {
 		JSONObject puzzlrJsonObject = new JSONObject(puzzlrJson);
 
 
-		Iterator<Object> crosswordsArrayIterator = puzzlrJsonObject.getJSONArray(JSON_KEY_PUZZLES).iterator();
-		while (crosswordsArrayIterator.hasNext()) {
-			Integer crosswordNumber = null;
-			JSONObject crosswordObject = (JSONObject) crosswordsArrayIterator.next();
+		Iterator<Object> puzzlesArrayIterator = puzzlrJsonObject.getJSONArray(JSON_KEY_PUZZLES).iterator();
+		while (puzzlesArrayIterator.hasNext()) {
+			Integer puzzleNumber = null;
+			JSONObject puzzleObject = (JSONObject) puzzlesArrayIterator.next();
 
-			String crosswordType = crosswordObject.optString(JSON_KEY_TYPE, PUZZLE_TYPE_DATE_DEFAULT);
-			String urlFormat = crosswordObject.getString(JSON_KEY_URL_FORMAT);
+			String puzzleType = puzzleObject.optString(JSON_KEY_TYPE, PUZZLE_TYPE_DATE_DEFAULT);
+			String urlFormat = puzzleObject.getString(JSON_KEY_URL_FORMAT);
 
-			if(crosswordType.equalsIgnoreCase(PUZZLE_TYPE_DATE_DEFAULT)) {
+			if(puzzleType.equalsIgnoreCase(PUZZLE_TYPE_DATE_DEFAULT)) {
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(urlFormat);
 				String formattedUrl = simpleDateFormat.format(currentDate );
 
 				puzzles.add(
 						new Puzzle(
-								crosswordObject.getString(JSON_KEY_NAME), 
-								crosswordObject.getString(JSON_KEY_FILE_NAME), 
+								puzzleObject.getString(JSON_KEY_NAME), 
+								puzzleObject.getString(JSON_KEY_FILE_NAME), 
 								formattedUrl, 
-								crosswordObject.getString(JSON_KEY_EXTRACTOR),
-								crosswordObject.getString(JSON_KEY_XSL),
-								crosswordType
+								puzzleObject.getString(JSON_KEY_EXTRACTOR),
+								puzzleObject.getString(JSON_KEY_XSL),
+								puzzleType
 								)
 						);
-			} else if(crosswordType.equalsIgnoreCase(PUZZLE_TYPE_NUMBER)){
+			} else if(puzzleType.equalsIgnoreCase(PUZZLE_TYPE_NUMBER)){
 				// add a numeric format now
-				String translateDate = crosswordObject.getString(JSON_KEY_TRANSLATE_DATE);
-				String translateNumber = crosswordObject.getString(JSON_KEY_TRANSLATE_NUMBER);
+				String translateDate = puzzleObject.getString(JSON_KEY_TRANSLATE_DATE);
+				String translateNumber = puzzleObject.getString(JSON_KEY_TRANSLATE_NUMBER);
 				Date dateTranslate = new SimpleDateFormat(COMMAND_LINE_ARG_DATE_FORMAT).parse(translateDate);
 
 				int numDaysDifference = (int)((currentDate .getTime() - dateTranslate.getTime()) / (1000 * 60 * 60 * 24) );
 				int parseInt = Integer.parseInt(translateNumber);
 
-				crosswordNumber = parseInt + numDaysDifference;
-				String formattedUrl = String.format(urlFormat, crosswordNumber);
-				Puzzle crossword = new Puzzle(
-						crosswordObject.getString(JSON_KEY_NAME), 
-						crosswordObject.getString(JSON_KEY_FILE_NAME), 
+				puzzleNumber = parseInt + numDaysDifference;
+				String formattedUrl = String.format(urlFormat, puzzleNumber);
+				Puzzle puzzle = new Puzzle(
+						puzzleObject.getString(JSON_KEY_NAME), 
+						puzzleObject.getString(JSON_KEY_FILE_NAME), 
 						formattedUrl, 
-						crosswordObject.getString(JSON_KEY_EXTRACTOR),
-						crosswordObject.getString(JSON_KEY_XSL),
-						crosswordType,
+						puzzleObject.getString(JSON_KEY_EXTRACTOR),
+						puzzleObject.getString(JSON_KEY_XSL),
+						puzzleType,
 						translateDate,
 						translateNumber
 						);
-				crossword.setPuzzleNumber(crosswordNumber);
+				puzzle.setPuzzleNumber(puzzleNumber);
 				puzzles.add(
-						crossword
+						puzzle
 						);
 			} else {
-				LOGGER.error("Unknown crossword type of '{}'", crosswordType);
+				LOGGER.error("Unknown puzzle type of '{}'", puzzleType);
 			}
 		}
 
 		// check to see whether we have a duplicate URL
 		boolean hasDuplicate = false;
 		Set<String> urls = new HashSet<String>();
-		for (Puzzle crossword : puzzles) {
-			String formattedUrl = crossword.getFormattedUrl();
+		for (Puzzle puzzle : puzzles) {
+			String formattedUrl = puzzle.getFormattedUrl();
 			if(urls.contains(formattedUrl)) {
-				LOGGER.error("Crossword already contains url '{}'", formattedUrl);
+				LOGGER.error("Puzzle already contains url '{}'", formattedUrl);
 				hasDuplicate = true;
 			}
 			urls.add(formattedUrl);
 		}
 
 		if(hasDuplicate) {
-			LOGGER.error("Found duplicate urls for crosswords, exiting...");
+			LOGGER.error("Found duplicate urls for puzzles, exiting...");
 			System.exit(-1);
 		}
 
@@ -190,22 +190,22 @@ public class PuzzlrMain {
 	 * @throws IOException if there was an error writing the file
 	 */
 	private static void writeXmlFilesAndMerge() throws IOException {
-		for (Puzzle crossword : puzzles) {
-			String xmlFileName = "./output/xml/" + crossword.getFileName()  + new SimpleDateFormat("yyyy-MM-dd").format(currentDate ) + ".xml";
+		for (Puzzle puzzle : puzzles) {
+			String xmlFileName = "./output/xml/" + puzzle.getFileName()  + new SimpleDateFormat("yyyy-MM-dd").format(currentDate ) + ".xml";
 			File xmlFile = new File(xmlFileName);
 			if(!xmlFile.exists()) {
 				LOGGER.info("Downloading file '{}'", xmlFileName);
 				try {
-					FileUtils.writeStringToFile(xmlFile, crossword.getData(), Charset.defaultCharset());
+					FileUtils.writeStringToFile(xmlFile, puzzle.getData(), Charset.defaultCharset());
 				} catch (PuzzlrException ex) {
-					crossword.setIsCorrect(false);
+					puzzle.setIsCorrect(false);
 					LOGGER.error(ex.getMessage(), ex);
 					continue;
 				}
 			} else {
 				LOGGER.info("File exists, not downloading file '{}'", xmlFileName);
 			}
-			convertToPDF(xmlFile, crossword , crossword.getPuzzleNumber());
+			convertToPDF(xmlFile, puzzle , puzzle.getPuzzleNumber());
 		}
 	}
 
@@ -213,17 +213,17 @@ public class PuzzlrMain {
 	 * Convert the XML to a PDF
 	 * 
 	 * @param xmlFile The location of the XML file
-	 * @param crossword The crossword data
-	 * @param number The crossword number (if not null)
+	 * @param puzzle The puzzle data
+	 * @param number The puzzle number (if not null)
 	 */
-	public static void convertToPDF(File xmlFile, Puzzle crossword, Integer number) {
-		if(!crossword.getIsCorrect()) {
-			LOGGER.error("Crossword '{}' for '{}' is marked as not correct, ignoring...", crossword.getName(), crossword.getFileName());
+	public static void convertToPDF(File xmlFile, Puzzle puzzle, Integer number) {
+		if(!puzzle.getIsCorrect()) {
+			LOGGER.error("Puzzle '{}' for '{}' is marked as not correct, ignoring...", puzzle.getName(), puzzle.getFileName());
 			return;
 		}
-		String pdfFile = "./output/pdf/" + crossword.getFileName() + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".pdf";
+		String pdfFile = "./output/pdf/" + puzzle.getFileName() + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".pdf";
 
-		LOGGER.info("Converting file '{}' to '{}', with xsl '{}'", xmlFile.getName(), pdfFile, crossword.getXsl());
+		LOGGER.info("Converting file '{}' to '{}', with xsl '{}'", xmlFile.getName(), pdfFile, puzzle.getXsl());
 
 		// the XML file which provides the input
 		StreamSource xmlSource = new StreamSource(xmlFile);
@@ -246,10 +246,10 @@ public class PuzzlrMain {
 
 			// Setup XSLT
 			TransformerFactory factory = TransformerFactory.newInstance();
-			InputStream resourceAsStream = PuzzlrMain.class.getResourceAsStream("/" + crossword.getXsl());
+			InputStream resourceAsStream = PuzzlrMain.class.getResourceAsStream("/" + puzzle.getXsl());
 
 			Transformer transformer = factory.newTransformer(new StreamSource(resourceAsStream));
-			transformer.setParameter(XSLT_VARIABLE_PUZZLE_NAME, crossword.getName());
+			transformer.setParameter(XSLT_VARIABLE_PUZZLE_NAME, puzzle.getName());
 			transformer.setParameter(XSLT_VARIABLE_PUZZLE_IDENTIFIER, new SimpleDateFormat("dd MMMM yyyy").format(currentDate));
 			if(null != number) {
 				transformer.setParameter(XSLT_VARIABLE_PUZZLE_NUMBER, number);
