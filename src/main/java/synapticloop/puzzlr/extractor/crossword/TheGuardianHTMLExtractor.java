@@ -1,4 +1,4 @@
-package synapticloop.puzzlr.crossword.extractor;
+package synapticloop.puzzlr.extractor.crossword;
 
 /*
  * Copyright (c) 2019 Synapticloop.
@@ -21,7 +21,7 @@ import org.json.JSONArray;
 
 import org.json.JSONObject;
 
-import synapticloop.puzzlr.crossword.extractor.data.Cell;
+import synapticloop.puzzlr.extractor.crossword.data.Cell;
 
 
 public class TheGuardianHTMLExtractor extends CellBasedExtractor {

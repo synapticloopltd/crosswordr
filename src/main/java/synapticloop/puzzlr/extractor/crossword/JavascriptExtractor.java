@@ -1,4 +1,4 @@
-package synapticloop.puzzlr.crossword.extractor;
+package synapticloop.puzzlr.extractor.crossword;
 
 import synapticloop.puzzlr.extractor.ExtractorBase;
 

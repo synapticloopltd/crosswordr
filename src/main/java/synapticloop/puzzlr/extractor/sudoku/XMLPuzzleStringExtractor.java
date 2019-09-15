@@ -1,4 +1,4 @@
-package synapticloop.puzzlr.sudoku.extractor;
+package synapticloop.puzzlr.extractor.sudoku;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

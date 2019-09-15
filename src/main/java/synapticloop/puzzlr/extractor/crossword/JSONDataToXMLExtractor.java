@@ -1,4 +1,4 @@
-package synapticloop.puzzlr.crossword.extractor;
+package synapticloop.puzzlr.extractor.crossword;
 
 /*
  * Copyright (c) 2019 Synapticloop.
@@ -23,7 +23,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import synapticloop.puzzlr.crossword.extractor.data.Cell;
+import synapticloop.puzzlr.extractor.crossword.data.Cell;
 
 public class JSONDataToXMLExtractor extends CellBasedExtractor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(JSONDataToXMLExtractor.class);
