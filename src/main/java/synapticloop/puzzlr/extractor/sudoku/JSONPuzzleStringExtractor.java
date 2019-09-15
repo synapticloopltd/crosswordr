@@ -1,9 +1,6 @@
 package synapticloop.puzzlr.extractor.sudoku;
 
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 
 import synapticloop.puzzlr.extractor.BaseExtractor;
 
@@ -13,6 +10,9 @@ public class JSONPuzzleStringExtractor extends BaseExtractor {
 	public String extract(String data) {
 		JSONObject sudokuObject = new JSONObject(data);
 		String sudokuData = sudokuObject.getJSONArray("cells").getJSONObject(0).getJSONObject("meta").getString("data");
+		if(sudokuData.trim().length() == 0) {
+			return(null);
+		}
 		String puzzle = sudokuData.substring(0, sudokuData.indexOf("$"));
 		String solution = sudokuData.substring(sudokuData.lastIndexOf("$") + 1);
 		StringBuffer stringBuffer = new StringBuffer();

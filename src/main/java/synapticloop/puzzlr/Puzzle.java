@@ -85,7 +85,11 @@ public class Puzzle {
 
 		try {
 			LOGGER.info("attempting to download from '{}'", formattedUrl);
-			return(extractorBase.extract(IOUtils.toString(new URL(formattedUrl).openStream(), "UTF-8")));
+			String extract = extractorBase.extract(IOUtils.toString(new URL(formattedUrl).openStream(), "UTF-8"));
+			if(null == extract) {
+				throw new PuzzlrException("Could not extract data");
+			}
+			return extract;
 		} catch (IOException ex) {
 			LOGGER.error("Could not download file from '{}'", formattedUrl, ex);
 			throw new PuzzlrException("Could not download the file from url'" + formattedUrl + "'.", ex);

@@ -17,10 +17,13 @@ package synapticloop.puzzlr.exception;
  */
 
 public class PuzzlrException extends Exception {
+	private static final long serialVersionUID = 6321463505225680651L;
+
+	public PuzzlrException(String message) {
+		super(message);
+	}
+
 	public PuzzlrException(String message, Exception exception) {
 		super(message, exception);
 	}
-
-	private static final long serialVersionUID = 6321463505225680651L;
-
 }

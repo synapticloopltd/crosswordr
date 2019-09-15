@@ -17,6 +17,46 @@
 			"xsl": "sudoku-compiler-landscape.xsl"
 		},
 		{
+			"name": "Evening Standard Daily Sudoku - Easy",
+			"file_name": "evening_standard_daily_sudoku_easy_",
+			"url_format": "https://gamesfeeds.blob.core.windows.net/sudoku/standard/puzzleEasy%d.xml",
+			"extractor": "synapticloop.puzzlr.extractor.sudoku.XMLPuzzleStringExtractor",
+			"xsl": "sudoku-compiler-landscape.xsl",
+			"type": "number",
+			"translateDate": "20190913",
+			"translateNumber": "1225"
+		},
+		{
+			"name": "Evening Standard Daily Sudoku - Medium",
+			"file_name": "evening_standard_daily_sudoku_medium_",
+			"url_format": "https://gamesfeeds.blob.core.windows.net/sudoku/standard/puzzleMedium%d.xml",
+			"extractor": "synapticloop.puzzlr.extractor.sudoku.XMLPuzzleStringExtractor",
+			"xsl": "sudoku-compiler-landscape.xsl",
+			"type": "number",
+			"translateDate": "20190913",
+			"translateNumber": "365"
+		},
+		{
+			"name": "Evening Standard Daily Sudoku - Hard",
+			"file_name": "evening_standard_daily_sudoku_hard_",
+			"url_format": "https://gamesfeeds.blob.core.windows.net/sudoku/standard/puzzleHard%d.xml",
+			"extractor": "synapticloop.puzzlr.extractor.sudoku.XMLPuzzleStringExtractor",
+			"xsl": "sudoku-compiler-landscape.xsl",
+			"type": "number",
+			"translateDate": "20190913",
+			"translateNumber": "194"
+		},
+		{
+			"name": "Evening Standard Daily Sudoku - Expert",
+			"file_name": "evening_standard_daily_sudoku_expert_",
+			"url_format": "https://gamesfeeds.blob.core.windows.net/sudoku/standard/puzzleExpert%d.xml",
+			"extractor": "synapticloop.puzzlr.extractor.sudoku.XMLPuzzleStringExtractor",
+			"xsl": "sudoku-compiler-landscape.xsl",
+			"type": "number",
+			"translateDate": "20190915",
+			"translateNumber": "51"
+		},
+		{
 			"name": "The Guardian Online Cryptic Crossword",
 			"file_name": "the_guardian_online_cryptic_crossword_",
 			"url_format": "https://www.theguardian.com/crosswords/cryptic/%d",
