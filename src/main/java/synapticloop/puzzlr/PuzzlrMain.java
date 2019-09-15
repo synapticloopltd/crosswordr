@@ -82,7 +82,7 @@ public class PuzzlrMain {
 	private static final String XSLT_VARIABLE_CROSSWORD_NUMBER = "crosswordNumber";
 	private static final String XSLT_VARIABLE_CROSSWORD_IDENTIFIER = "crosswordIdentifier";
 
-	private static List<Crossword> crosswords = new ArrayList<Crossword>();
+	private static List<Puzzle> crosswords = new ArrayList<Puzzle>();
 
 	private static List<String> GENERATED_FILES = new ArrayList<String>();
 
@@ -166,7 +166,7 @@ public class PuzzlrMain {
 		// check to see whether we have a duplicate URL
 		boolean hasDuplicate = false;
 		Set<String> urls = new HashSet<String>();
-		for (Crossword crossword : crosswords) {
+		for (Puzzle crossword : crosswords) {
 			String formattedUrl = crossword.getFormattedUrl();
 			if(urls.contains(formattedUrl)) {
 				LOGGER.error("Crossword already contains url '{}'", formattedUrl);
@@ -191,7 +191,7 @@ public class PuzzlrMain {
 	 * @throws IOException if there was an error writing the file
 	 */
 	private static void writeXmlFilesAndMerge() throws IOException {
-		for (Crossword crossword : crosswords) {
+		for (Puzzle crossword : crosswords) {
 			String xmlFileName = "./output/xml/" + crossword.getFileName()  + new SimpleDateFormat("yyyy-MM-dd").format(currentDate ) + ".xml";
 			File xmlFile = new File(xmlFileName);
 			if(!xmlFile.exists()) {
@@ -206,7 +206,7 @@ public class PuzzlrMain {
 			} else {
 				LOGGER.info("File exists, not downloading file '{}'", xmlFileName);
 			}
-			convertToPDF(xmlFile, crossword , crossword.getCrosswordNumber());
+			convertToPDF(xmlFile, crossword , crossword.getPuzzleNumber());
 		}
 	}
 
@@ -217,7 +217,7 @@ public class PuzzlrMain {
 	 * @param crossword The crossword data
 	 * @param number The crossword number (if not null)
 	 */
-	public static void convertToPDF(File xmlFile, Crossword crossword, Integer number) {
+	public static void convertToPDF(File xmlFile, Puzzle crossword, Integer number) {
 		if(!crossword.getIsCorrect()) {
 			LOGGER.error("Crossword '{}' for '{}' is marked as not correct, ignoring...", crossword.getName(), crossword.getFileName());
 			return;

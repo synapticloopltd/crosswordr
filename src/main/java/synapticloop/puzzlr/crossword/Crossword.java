@@ -45,7 +45,7 @@ public class Crossword extends Puzzle {
 	 * @param formattedUrl The date (or number) formatted url
 	 * @param extractor The data extractor to be used 
 	 * @param xsl The XSL transformation file to be used
-	 * @param type The type - iether one of number or date
+	 * @param type The type - either one of number or date
 	 */
 	public Crossword(String name, 
 			String fileName, 

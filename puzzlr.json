@@ -6,9 +6,7 @@
 			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/the-daily-games/the-daily-sudoku/sdk'yyMMdd'.xml'",
 			"extractor": "synapticloop.puzzlr.sudoku.extractor.XMLPuzzleStringExtractor",
 			"xsl": "sudoku-compiler-landscape.xsl"
-		}
-	],
-	"temp": [
+		},
 		{
 			"name": "The Guardian Online Cryptic Crossword",
 			"file_name": "the_guardian_online_cryptic_crossword_",

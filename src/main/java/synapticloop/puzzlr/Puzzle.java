@@ -21,6 +21,7 @@ public abstract class Puzzle {
 	protected String formattedUrl = null;
 	protected String extractor = null;
 	protected String xsl = null;
+	private Integer puzzleNumber = null;
 
 	/**
 	 * Get the data as a string from the url, after passing it through the
@@ -64,6 +65,8 @@ public abstract class Puzzle {
 	public String getExtractor() { return extractor; }
 
 	public String getXsl() { return(xsl); }
+	
+	public Integer getPuzzleNumber() { return(puzzleNumber); }
 
 	public void setIsCorrect(boolean isCorrect) { this.isCorrect = isCorrect; }
 	public boolean getIsCorrect() { return(this.isCorrect); }
