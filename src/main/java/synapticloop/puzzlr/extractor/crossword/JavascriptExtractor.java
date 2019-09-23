@@ -1,7 +1,5 @@
 package synapticloop.puzzlr.extractor.crossword;
 
-import synapticloop.puzzlr.extractor.BaseExtractor;
-
 /*
  * Copyright (c) 2019 Synapticloop.
  * 
@@ -17,6 +15,8 @@ import synapticloop.puzzlr.extractor.BaseExtractor;
  * A copy of the Licence is available in the file named LICENSE.txt shipped with 
  * this source code or binaries.
  */
+
+import synapticloop.puzzlr.extractor.BaseExtractor;
 
 public class JavascriptExtractor extends BaseExtractor {
 

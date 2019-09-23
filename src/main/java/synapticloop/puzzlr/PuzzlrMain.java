@@ -68,7 +68,6 @@ public class PuzzlrMain {
 
 
 	private static final String JSON_KEY_NAME = "name";
-	private static final String JSON_KEY_FILE_NAME = "file_name";
 	private static final String JSON_KEY_URL_FORMAT = "url_format";
 	private static final String JSON_KEY_EXTRACTOR = "extractor";
 	private static final String JSON_KEY_XSL = "xsl";
@@ -125,7 +124,6 @@ public class PuzzlrMain {
 				puzzles.add(
 						new Puzzle(
 								puzzleObject.getString(JSON_KEY_NAME), 
-								puzzleObject.getString(JSON_KEY_FILE_NAME), 
 								formattedUrl, 
 								puzzleObject.getString(JSON_KEY_EXTRACTOR),
 								puzzleObject.getString(JSON_KEY_XSL),
@@ -145,7 +143,6 @@ public class PuzzlrMain {
 				String formattedUrl = String.format(urlFormat, puzzleNumber);
 				Puzzle puzzle = new Puzzle(
 						puzzleObject.getString(JSON_KEY_NAME), 
-						puzzleObject.getString(JSON_KEY_FILE_NAME), 
 						formattedUrl, 
 						puzzleObject.getString(JSON_KEY_EXTRACTOR),
 						puzzleObject.getString(JSON_KEY_XSL),

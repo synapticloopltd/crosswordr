@@ -90,7 +90,7 @@ v - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 </xsl:template>
 
 <xsl:template name="crossword-title">
-	<fo:block margin-bottom="8mm" border-bottom="solid">
+	<fo:block margin-bottom="1mm" border-bottom="solid">
 		<fo:inline font-size="18pt" font-weight="bold" font-family="serif">
 			<xsl:value-of select="$puzzleName" /> 
 			<xsl:if test="$puzzleNumber != -1">

@@ -1,5 +1,21 @@
 package synapticloop.puzzlr;
 
+/*
+ * Copyright (c) 2019 Synapticloop.
+ * 
+ * All rights reserved.
+ * 
+ * This code may contain contributions from other parties which, where 
+ * applicable, will be listed in the default build file for the project 
+ * ~and/or~ in a file named CONTRIBUTORS.txt in the root of the project.
+ * 
+ * This source code and any derived binaries are covered by the terms and 
+ * conditions of the Licence agreement ("the Licence").  You may not use this 
+ * source code or any derived binaries except in compliance with the Licence.  
+ * A copy of the Licence is available in the file named LICENSE.txt shipped with 
+ * this source code or binaries.
+ */
+
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
@@ -20,7 +36,6 @@ public class Puzzle {
 	protected boolean isCorrect = true;
 
 	protected String name = null;
-	protected String fileName = null;
 	protected String formattedUrl = null;
 	protected String extractor = null;
 	protected String xsl = null;
@@ -30,14 +45,12 @@ public class Puzzle {
 	private Integer puzzleNumber = null;
 
 	public Puzzle(String name, 
-			String fileName, 
 			String formattedUrl, 
 			String extractor, 
 			String xsl, 
 			String type) {
 
 		this.name = name;
-		this.fileName = fileName;
 		this.formattedUrl = formattedUrl;
 		this.extractor = extractor;
 		this.xsl = xsl;
@@ -45,7 +58,6 @@ public class Puzzle {
 	}
 	
 	public Puzzle(String name, 
-			String fileName, 
 			String formattedUrl, 
 			String extractor, 
 			String xsl, 
@@ -53,7 +65,7 @@ public class Puzzle {
 			String translateDate, 
 			String translateNumber) {
 
-		this(name, fileName, formattedUrl, extractor, xsl, type);
+		this(name, formattedUrl, extractor, xsl, type);
 		this.translateDate = translateDate;
 		this.translateNumber = translateNumber;
 	}
@@ -98,7 +110,7 @@ public class Puzzle {
 
 	public String getName() { return name; }
 
-	public String getFileName() { return fileName; }
+	public String getFileName() { return name.toLowerCase().replaceAll("[^a-z]", "_") + "_"; }
 
 	public String getFormattedUrl() { return formattedUrl; }
 
