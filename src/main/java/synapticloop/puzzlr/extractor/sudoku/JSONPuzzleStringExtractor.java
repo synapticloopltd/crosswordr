@@ -70,7 +70,6 @@ public class JSONPuzzleStringExtractor extends BaseExtractor {
 			}
 		}
 		stringBuffer.append("</sudoku>\n");
-		System.out.println(stringBuffer.toString());
 		return(stringBuffer.toString());
 	}
 

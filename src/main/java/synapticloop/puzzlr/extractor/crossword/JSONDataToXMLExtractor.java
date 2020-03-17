@@ -60,8 +60,12 @@ public class JSONDataToXMLExtractor extends BaseCellExtractor {
 		}
 		LOGGER.info("Got data: {}", urlData);
 		// now that we have all of the values, time to generate the xml file
-		height = Integer.valueOf(keyValues.get(JSON_KEY_NUM_ROWS));
-		width = Integer.valueOf(keyValues.get(JSON_KEY_NUM_COLUMNS));
+		try {
+			height = Integer.valueOf(keyValues.get(JSON_KEY_NUM_ROWS));
+			width = Integer.valueOf(keyValues.get(JSON_KEY_NUM_COLUMNS));
+		} catch (NumberFormatException ex) {
+			return(null);
+		}
 		return(generateDataAndXml());
 	}
 

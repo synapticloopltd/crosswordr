@@ -29,7 +29,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.xml.transform.Result;
@@ -39,6 +41,11 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.sax.SAXResult;
 import javax.xml.transform.stream.StreamSource;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.fop.apps.FOPException;
 import org.apache.fop.apps.FOUserAgent;
@@ -54,6 +61,18 @@ import synapticloop.puzzlr.exception.PuzzlrException;
 
 public class PuzzlrMain {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PuzzlrMain.class);
+
+	// command line options
+	private static Options options = new Options();
+	static {
+		options.addOption("date", true, "The single date to search for");
+		options.addOption("rangestart", true, "The range of date to start (inclusive).");
+		options.addOption("rangeend", true, "The range of date to end (inclusive)");
+		options.addOption("slug", true, "The single item to download.");
+	}
+
+	// slug to title hashmap
+	private static final Map<String, String> SLUG_MAP = new LinkedHashMap<>();
 
 	// command line argument
 	private static final String COMMAND_LINE_ARG_DATE_FORMAT = "yyyyMMdd";
@@ -86,9 +105,14 @@ public class PuzzlrMain {
 
 	private static Date currentDate = null;
 
-	public static void main(String[] args) throws IOException, FOPException, TransformerException, ParseException {
+	public static void main(String[] args) throws IOException, FOPException, TransformerException, ParseException, org.apache.commons.cli.ParseException {
 		FileUtils.forceMkdir(new File("./output/xml"));
 		FileUtils.forceMkdir(new File("./output/pdf"));
+
+		CommandLineParser parser = new DefaultParser();
+		CommandLine cmd = parser.parse( options, args);
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp( "puzzlr", options );
 
 		if(args.length != 0) {
 			String argZero = args[0];
