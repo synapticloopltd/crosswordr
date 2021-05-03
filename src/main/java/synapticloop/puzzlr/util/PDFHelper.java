@@ -1,8 +1,5 @@
 package synapticloop.puzzlr.util;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-
 /*
  * Copyright (c) 2021 Synapticloop.
  * 
@@ -19,10 +16,12 @@ import java.io.FileNotFoundException;
  * this source code or binaries.
  */
 
+import java.io.File;
+import java.io.FileNotFoundException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.transform.Result;
@@ -130,6 +129,7 @@ public class PDFHelper {
 		}
 		return(null);
 	}
+
 	/**
 	 * Merge all of the generated files into a single PDF file
 	 * 

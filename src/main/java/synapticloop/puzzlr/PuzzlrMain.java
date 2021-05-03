@@ -33,11 +33,6 @@ import java.util.Set;
 
 import javax.xml.transform.TransformerException;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.fop.apps.FOPException;
 import org.json.JSONObject;
@@ -45,26 +40,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import synapticloop.puzzlr.exception.PuzzlrException;
+import synapticloop.puzzlr.util.CommandParserHelper;
 import synapticloop.puzzlr.util.PDFHelper;
 
 public class PuzzlrMain {
-	private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(PuzzlrMain.class);
 
-	private static final String CMD_DATE = "date";
-	private static final String CMD_RANGE_END = "end";
-	private static final String CMD_RANGE_START = "start";
-	private static final String CMD_SLUGS = "slugs";
-
-	// command line options
-	private static Options options = new Options();
-	static {
-		options.addOption(CMD_DATE, true, "The single date to search for");
-		options.addOption(CMD_RANGE_START, true, "The range of date to start (inclusive).");
-		options.addOption(CMD_RANGE_END, true, "The range of date to end (inclusive)");
-		options.addOption(CMD_SLUGS, true, "The comma separated list of slugs to download");
-	}
+	private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 	// slug to title hashmap
 	private static final Map<String, String> SLUG_MAP = new LinkedHashMap<>();
@@ -72,14 +54,13 @@ public class PuzzlrMain {
 	// command line argument
 	private static final String CMD_DATE_FORMAT = "yyyyMMdd";
 
-	private static final String PUZZLE_TYPE_DATE_DEFAULT = CMD_DATE;
+	private static final String PUZZLE_TYPE_DATE_DEFAULT = "date";
 	private static final String PUZZLE_TYPE_NUMBER = "number";
 
 	private static final String PUZZLR_JSON = "./puzzlr.json";
 
 	// all the keys for the JSON parser
 	private static final String JSON_KEY_PUZZLES = "puzzles";
-
 
 	private static final String JSON_KEY_NAME = "name";
 	private static final String JSON_KEY_SLUG = "slug";
@@ -94,27 +75,20 @@ public class PuzzlrMain {
 
 	private static List<String> GENERATED_FILES = new ArrayList<String>();
 
-	private static final Set<String> WANTED_SLUGS = new HashSet<>();
 
 	// the default command line arguments
-	private static String optionDate = null;
-	private static String optionRangeStart = null;
-	private static String optionRangeEnd = null;
-	private static String optionSlugs = null;
+	public static String optionDate = null;
+	public static String optionRangeStart = null;
+	public static String optionRangeEnd = null;
+	public static String optionSlugs = null;
+	public static final Set<String> WANTED_SLUGS = new HashSet<>();
 
+	
 	public static void main(String[] args) throws IOException, FOPException, TransformerException, ParseException, org.apache.commons.cli.ParseException {
 		FileUtils.forceMkdir(new File(Constants.DIR_OUTPUT_XML));
 		FileUtils.forceMkdir(new File(Constants.DIR_OUTPUT_PDF));
 
-		CommandLineParser parser = new DefaultParser();
-		CommandLine cmd = parser.parse(options, args);
-
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("puzzlr", options);
-
-		// now extract the commands
-		parseAndValidateCommandLineArguments(cmd);
-
+		new CommandParserHelper(args);
 
 		String puzzlrJson = FileUtils.readFileToString(new File(PUZZLR_JSON), Charset.defaultCharset());
 		JSONObject puzzlrJsonObject = new JSONObject(puzzlrJson);
@@ -242,46 +216,6 @@ public class PuzzlrMain {
 		}
 	}
 
-	private static void parseAndValidateCommandLineArguments(CommandLine cmd) {
-		optionDate = cmd.getOptionValue(CMD_DATE, SIMPLE_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
-		optionRangeStart = cmd.getOptionValue(CMD_RANGE_START, null);
-		optionRangeEnd = cmd.getOptionValue(CMD_RANGE_END, null);
-		optionSlugs = cmd.getOptionValue(CMD_SLUGS, null);
-
-		if(null != optionSlugs) {
-			String[] splits = optionSlugs.split(",");
-			for (String string : splits) {
-				WANTED_SLUGS.add(string);
-			}
-		}
-
-		// now check for the range start and end
-		if(null == optionRangeStart) {
-			optionRangeStart = optionDate;
-		}
-
-		if(null == optionRangeEnd) {
-			optionRangeEnd = optionDate;
-		}
-
-		System.out.println("Parsed and calculated parameter '" + CMD_DATE + "' of '" + optionDate + "'.");
-		System.out.println("Parsed and calculated parameter '" + CMD_RANGE_START + "' of '" + optionRangeEnd + "'.");
-		System.out.println("Parsed and calculated parameter '" + CMD_RANGE_END + "' of '" + optionRangeStart + "'.");
-		System.out.println("Parsed and calculated parameter '" + CMD_SLUGS + "' of '" + optionSlugs + "'.");
-
-		// finally - if optionRangeEnd is less than optionRangeStart, then just exit
-		try {
-			Date end = SIMPLE_DATE_FORMAT.parse(optionRangeEnd);
-			Date start = SIMPLE_DATE_FORMAT.parse(optionRangeStart);
-			if(end.before(start)) {
-				LOGGER.error("End date is before start date");
-				System.exit(-1);
-			}
-		} catch (ParseException e) {
-			LOGGER.error("Could not parse the options");
-			System.exit(-1);
-		}
-	}
 
 	/**
 	 * Write out the XML file into the location
