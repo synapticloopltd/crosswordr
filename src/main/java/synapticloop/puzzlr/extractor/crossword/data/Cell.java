@@ -1,7 +1,7 @@
 package synapticloop.puzzlr.extractor.crossword.data;
 
 /*
- * Copyright (c) 2019 Synapticloop.
+ * Copyright (c) 2019 - 2021 Synapticloop.
  * 
  * All rights reserved.
  * 
