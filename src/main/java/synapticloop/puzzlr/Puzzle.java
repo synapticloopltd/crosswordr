@@ -111,7 +111,7 @@ public class Puzzle {
 			}
 			return extract;
 		} catch (IOException ex) {
-			LOGGER.error("Could not download file from '{}'", formattedUrl, ex);
+			LOGGER.error("Could not download file from '{}'", formattedUrl);
 			throw new PuzzlrException("Could not download the file from url'" + formattedUrl + "'.", ex);
 		}
 	}

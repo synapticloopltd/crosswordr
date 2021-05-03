@@ -17,10 +17,7 @@ package synapticloop.puzzlr;
  */
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -34,12 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.transform.Result;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.sax.SAXResult;
-import javax.xml.transform.stream.StreamSource;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -48,18 +40,16 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.io.FileUtils;
 import org.apache.fop.apps.FOPException;
-import org.apache.fop.apps.FOUserAgent;
-import org.apache.fop.apps.Fop;
-import org.apache.fop.apps.FopFactory;
-import org.apache.fop.apps.MimeConstants;
-import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import synapticloop.puzzlr.exception.PuzzlrException;
+import synapticloop.puzzlr.util.PDFHelper;
 
 public class PuzzlrMain {
+	private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(PuzzlrMain.class);
 
 	private static final String CMD_DATE = "date";
@@ -100,12 +90,6 @@ public class PuzzlrMain {
 	private static final String JSON_KEY_TRANSLATE_DATE = "translateDate";
 	private static final String JSON_KEY_TRANSLATE_NUMBER = "translateNumber";
 
-	// all the XSLT variables that we are pumping into the template
-	private static final String XSLT_VARIABLE_PUZZLE_NAME = "puzzleName";
-	private static final String XSLT_VARIABLE_PUZZLE_SLUG = "puzzleSlug";
-	private static final String XSLT_VARIABLE_PUZZLE_NUMBER = "puzzleNumber";
-	private static final String XSLT_VARIABLE_PUZZLE_IDENTIFIER = "puzzleIdentifier";
-
 	private static List<Puzzle> puzzles = new ArrayList<Puzzle>();
 
 	private static List<String> GENERATED_FILES = new ArrayList<String>();
@@ -119,17 +103,18 @@ public class PuzzlrMain {
 	private static String optionSlugs = null;
 
 	public static void main(String[] args) throws IOException, FOPException, TransformerException, ParseException, org.apache.commons.cli.ParseException {
-		FileUtils.forceMkdir(new File("./output/xml"));
-		FileUtils.forceMkdir(new File("./output/pdf"));
+		FileUtils.forceMkdir(new File(Constants.DIR_OUTPUT_XML));
+		FileUtils.forceMkdir(new File(Constants.DIR_OUTPUT_PDF));
 
 		CommandLineParser parser = new DefaultParser();
 		CommandLine cmd = parser.parse(options, args);
 
+		HelpFormatter formatter = new HelpFormatter();
+		formatter.printHelp("puzzlr", options);
+
 		// now extract the commands
 		parseAndValidateCommandLineArguments(cmd);
 
-		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp("puzzlr", options);
 
 		String puzzlrJson = FileUtils.readFileToString(new File(PUZZLR_JSON), Charset.defaultCharset());
 		JSONObject puzzlrJsonObject = new JSONObject(puzzlrJson);
@@ -139,7 +124,16 @@ public class PuzzlrMain {
 			JSONObject puzzleObject = (JSONObject) puzzlesArrayIterator.next();
 			String slug = puzzleObject.optString(JSON_KEY_SLUG, null);
 			String puzzleName = puzzleObject.getString(JSON_KEY_NAME);
-			LOGGER.info("Found slug '{}' for puzzle named '{}'", slug, puzzleName);
+			if(null == slug) {
+				LOGGER.warn("No slug found for puzzle named '{}', you WILL NOT be able to reference this puzzle", puzzleName);
+			} else {
+				LOGGER.info("Found slug '{}' for puzzle named '{}'", slug, puzzleName);
+				if(SLUG_MAP.containsKey(slug)) {
+					LOGGER.error("Slug '{}' already exists for puzzle named '{}', so the puzzle named '{}' will be ignored.", slug, SLUG_MAP.get(slug), puzzleName);
+				} else {
+					SLUG_MAP.put(slug, puzzleName);
+				}
+			}
 		}
 
 
@@ -153,17 +147,17 @@ public class PuzzlrMain {
 				shouldStop = true;
 			} else {
 				// increment defaultCommandDate
-				Date downloadDate = new SimpleDateFormat("yyyy-MM-dd").parse(optionDate);
+				Date downloadDate = SIMPLE_DATE_FORMAT.parse(optionDate);
 				Calendar instance = Calendar.getInstance();
 				instance.setTime(downloadDate);
 				instance.add(Calendar.DAY_OF_MONTH, 1);
-				optionDate = new SimpleDateFormat("yyyy-MM-dd").format(instance.getTime());
+				optionDate = SIMPLE_DATE_FORMAT.format(instance.getTime());
 			}
 		}
 
 		writeXmlFilesAndMerge();
 
-		mergeFiles();
+		PDFHelper.mergeFiles(GENERATED_FILES, optionRangeStart, optionRangeEnd);
 	}
 
 	private static void generatePuzzles(JSONObject puzzlrJsonObject) throws ParseException {
@@ -178,14 +172,13 @@ public class PuzzlrMain {
 
 			if(puzzleType.equalsIgnoreCase(PUZZLE_TYPE_DATE_DEFAULT)) {
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(urlFormat);
-				new SimpleDateFormat("yyyy-MM-dd").parse(optionDate);
-				String formattedUrl = simpleDateFormat.format(new SimpleDateFormat("yyyy-MM-dd").parse(optionDate));
+				String formattedUrl = simpleDateFormat.format(SIMPLE_DATE_FORMAT.parse(optionDate));
 
 				// if the wanted slugs set is empty - we want all, if not empty, only those slugs
 
 				Puzzle puzzle = new Puzzle(
 						puzzleObject.getString(JSON_KEY_NAME), 
-						puzzleObject.getString(JSON_KEY_SLUG),
+						puzzleObject.optString(JSON_KEY_SLUG, null),
 						optionDate,
 						formattedUrl, 
 						puzzleObject.getString(JSON_KEY_EXTRACTOR),
@@ -204,7 +197,7 @@ public class PuzzlrMain {
 				String translateNumber = puzzleObject.getString(JSON_KEY_TRANSLATE_NUMBER);
 				Date dateTranslate = new SimpleDateFormat(CMD_DATE_FORMAT).parse(translateDate);
 
-				int numDaysDifference = (int)((new SimpleDateFormat("yyyy-MM-dd").parse(optionDate).getTime() - dateTranslate.getTime()) / (1000 * 60 * 60 * 24) );
+				int numDaysDifference = (int)((SIMPLE_DATE_FORMAT.parse(optionDate).getTime() - dateTranslate.getTime()) / (1000 * 60 * 60 * 24) );
 				int parseInt = Integer.parseInt(translateNumber);
 
 				puzzleNumber = parseInt + numDaysDifference;
@@ -250,7 +243,7 @@ public class PuzzlrMain {
 	}
 
 	private static void parseAndValidateCommandLineArguments(CommandLine cmd) {
-		optionDate = cmd.getOptionValue(CMD_DATE, new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis())));
+		optionDate = cmd.getOptionValue(CMD_DATE, SIMPLE_DATE_FORMAT.format(new Date(System.currentTimeMillis())));
 		optionRangeStart = cmd.getOptionValue(CMD_RANGE_START, null);
 		optionRangeEnd = cmd.getOptionValue(CMD_RANGE_END, null);
 		optionSlugs = cmd.getOptionValue(CMD_SLUGS, null);
@@ -278,8 +271,8 @@ public class PuzzlrMain {
 
 		// finally - if optionRangeEnd is less than optionRangeStart, then just exit
 		try {
-			Date end = new SimpleDateFormat("yyyy-MM-dd").parse(optionRangeEnd);
-			Date start = new SimpleDateFormat("yyyy-MM-dd").parse(optionRangeStart);
+			Date end = SIMPLE_DATE_FORMAT.parse(optionRangeEnd);
+			Date start = SIMPLE_DATE_FORMAT.parse(optionRangeStart);
 			if(end.before(start)) {
 				LOGGER.error("End date is before start date");
 				System.exit(-1);
@@ -297,7 +290,7 @@ public class PuzzlrMain {
 	 */
 	private static void writeXmlFilesAndMerge() throws IOException {
 		for (Puzzle puzzle : puzzles) {
-			String xmlFileName = "./output/xml/" + puzzle.getFileName()  + puzzle.getDate() + ".xml";
+			String xmlFileName = Constants.DIR_OUTPUT_XML + puzzle.getFileName()  + puzzle.getDate() + ".xml";
 			File xmlFile = new File(xmlFileName);
 			if(!xmlFile.exists()) {
 				LOGGER.info("Downloading file '{}'", xmlFileName);
@@ -305,110 +298,16 @@ public class PuzzlrMain {
 					FileUtils.writeStringToFile(xmlFile, puzzle.getData(), Charset.defaultCharset());
 				} catch (PuzzlrException ex) {
 					puzzle.setIsCorrect(false);
-					LOGGER.error(ex.getMessage(), ex);
+					LOGGER.error(ex.getMessage());
 					continue;
 				}
 			} else {
 				LOGGER.info("File exists, not downloading file '{}'", xmlFileName);
 			}
-			convertToPDF(xmlFile, puzzle , puzzle.getPuzzleNumber());
-		}
-	}
-
-	/**
-	 * Convert the XML to a PDF
-	 * 
-	 * @param xmlFile The location of the XML file
-	 * @param puzzle The puzzle data
-	 * @param number The puzzle number (if not null)
-	 */
-	public static void convertToPDF(File xmlFile, Puzzle puzzle, Integer number) {
-		if(!puzzle.getIsCorrect()) {
-			LOGGER.error("Puzzle '{}' for '{}' is marked as not correct, ignoring...", puzzle.getName(), puzzle.getFileName());
-			return;
-		}
-		String pdfFile = "./output/pdf/" + puzzle.getFileName() + puzzle.getDate() + ".pdf";
-
-		LOGGER.info("Converting file '{}' to '{}', with xsl '{}'", xmlFile.getName(), pdfFile, puzzle.getXsl());
-
-		// the XML file which provides the input
-		StreamSource xmlSource = new StreamSource(xmlFile);
-		// create an instance of fop factory
-		FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
-		// a user agent is needed for transformation
-		FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
-		// Setup output
-		OutputStream out = null;
-		try {
-			out = new java.io.FileOutputStream(pdfFile);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-
-		try {
-			// Construct fop with desired output format
-			Fop fop = fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, out);
-
-			// Setup XSLT
-			TransformerFactory factory = TransformerFactory.newInstance();
-			InputStream resourceAsStream = PuzzlrMain.class.getResourceAsStream("/" + puzzle.getXsl());
-
-			Transformer transformer = factory.newTransformer(new StreamSource(resourceAsStream));
-			transformer.setParameter(XSLT_VARIABLE_PUZZLE_NAME, puzzle.getName());
-			transformer.setParameter(XSLT_VARIABLE_PUZZLE_SLUG, puzzle.getSlug());
-			transformer.setParameter(XSLT_VARIABLE_PUZZLE_IDENTIFIER, puzzle.getDate());
-			if(null != number) {
-				transformer.setParameter(XSLT_VARIABLE_PUZZLE_NUMBER, number);
-			} else {
-				transformer.setParameter(XSLT_VARIABLE_PUZZLE_NUMBER, -1);
+			String pdfFile = PDFHelper.convertToPDF(xmlFile, puzzle , puzzle.getPuzzleNumber());
+			if(null != pdfFile) {
+				GENERATED_FILES.add(pdfFile);
 			}
-
-			// Resulting SAX events (the generated FO) must be piped through to FOP
-			Result res = new SAXResult(fop.getDefaultHandler());
-
-			// Start XSLT transformation and FOP processing
-			// That's where the XML is first transformed to XSL-FO and then 
-			// PDF is created
-			transformer.transform(xmlSource, res);
-
-			// if we get to this point - then the file has been added
-			GENERATED_FILES.add(pdfFile);
-		} catch (FOPException | TransformerException ex) {
-			LOGGER.error("Exception caught, message was: {}", ex);
-		} finally {
-			try {
-				out.close();
-			} catch (IOException e) {
-				// do nothing
-			}
-		}
-	}
-
-	/**
-	 * Merge all of the generated files into a single PDF file
-	 * 
-	 * @throws IOException
-	 */
-	private static void mergeFiles() throws IOException {
-		// now merge the files
-		if(GENERATED_FILES.size() != 0) {
-			PDFMergerUtility pdfMergerUtility= new PDFMergerUtility();
-			String destinationPdf = null;
-			if(optionRangeEnd.equals(optionRangeStart)) {
-				destinationPdf = "./output/pdf/" + optionDate + ".pdf";
-			} else {
-				destinationPdf = "./output/pdf/" + optionRangeStart + "-to-" + optionRangeEnd + ".pdf";
-			}
-
-			pdfMergerUtility.setDestinationFileName(destinationPdf);
-			for (String generatedFile : GENERATED_FILES) {
-				pdfMergerUtility.addSource(generatedFile);
-				LOGGER.info("Merging file '{}' into '{}'", generatedFile, destinationPdf);
-			}
-			pdfMergerUtility.mergeDocuments(null);
-			LOGGER.info("Merged {} file(s) to '{}'", GENERATED_FILES.size(), destinationPdf);
-		} else {
-			LOGGER.error("No generated files to merge... skipping...");
 		}
 	}
 }
