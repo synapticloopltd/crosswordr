@@ -89,6 +89,7 @@
 		},
 		{
 			"name": "The Independent's Cryptic Crossword",
+			"slug": "ticc",
 			"url_format": "'https://ams.cdn.arkadiumhosted.com/assets/gamesfeed/independent/daily-crossword/c_'yyMMdd'.xml'",
 			"extractor": "synapticloop.puzzlr.extractor.crossword.PassthroughExtractor",
 			"xsl": "crossword-compiler-landscape.xsl"

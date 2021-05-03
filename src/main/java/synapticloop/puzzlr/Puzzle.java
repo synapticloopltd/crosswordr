@@ -39,25 +39,33 @@ public class Puzzle {
 	protected String formattedUrl = null;
 	protected String extractor = null;
 	protected String xsl = null;
+	protected String slug = null;
+	protected String date = null;
 	private String type = "date";
 	private String translateDate = null;
 	private String translateNumber = null;
 	private Integer puzzleNumber = null;
 
 	public Puzzle(String name, 
+			String slug,
+			String date,
 			String formattedUrl, 
-			String extractor, 
+			String extractor,
 			String xsl, 
 			String type) {
 
 		this.name = name;
+		this.slug = slug;
+		this.date = date;
 		this.formattedUrl = formattedUrl;
 		this.extractor = extractor;
 		this.xsl = xsl;
 		this.type = type;
 	}
-	
+
 	public Puzzle(String name, 
+			String slug,
+			String date,
 			String formattedUrl, 
 			String extractor, 
 			String xsl, 
@@ -65,7 +73,7 @@ public class Puzzle {
 			String translateDate, 
 			String translateNumber) {
 
-		this(name, formattedUrl, extractor, xsl, type);
+		this(name, slug, date, formattedUrl, extractor, xsl, type);
 		this.translateDate = translateDate;
 		this.translateNumber = translateNumber;
 	}
@@ -117,7 +125,11 @@ public class Puzzle {
 	public String getExtractor() { return extractor; }
 
 	public String getXsl() { return(xsl); }
+
+	public String getSlug() { return(slug); }
 	
+	public String getDate() { return(date); }
+
 	public Integer getPuzzleNumber() { return(puzzleNumber); }
 	public void setPuzzleNumber(Integer puzzleNumber) { this.puzzleNumber = puzzleNumber; }
 

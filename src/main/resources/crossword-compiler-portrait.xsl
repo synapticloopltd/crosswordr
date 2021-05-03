@@ -8,6 +8,7 @@
 
 	<xsl:output method="xml" indent="yes"/>
 	<xsl:param name="puzzleName" />
+	<xsl:param name="puzzleSlug" />
 	<xsl:param name="puzzleIdentifier" />
 	<xsl:param name="puzzleNumber" />
 
@@ -44,7 +45,7 @@
 				(#<xsl:value-of select="$puzzleNumber" />)
 			</xsl:if> - 
 		</fo:inline>
-		<fo:inline font-size="10pt" font-family="serif"><xsl:value-of select="$puzzleIdentifier" /></fo:inline>
+		<fo:inline font-size="10pt" font-family="serif"><xsl:value-of select="$puzzleIdentifier" /> [<xsl:value-of select="$puzzleSlug" />]</fo:inline>
 	</fo:block>
 </xsl:template>
 

@@ -62,22 +62,27 @@ import synapticloop.puzzlr.exception.PuzzlrException;
 public class PuzzlrMain {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PuzzlrMain.class);
 
+	private static final String CMD_DATE = "date";
+	private static final String CMD_RANGE_END = "end";
+	private static final String CMD_RANGE_START = "start";
+	private static final String CMD_SLUGS = "slugs";
+
 	// command line options
 	private static Options options = new Options();
 	static {
-		options.addOption("date", true, "The single date to search for");
-		options.addOption("rangestart", true, "The range of date to start (inclusive).");
-		options.addOption("rangeend", true, "The range of date to end (inclusive)");
-		options.addOption("slug", true, "The single item to download.");
+		options.addOption(CMD_DATE, true, "The single date to search for");
+		options.addOption(CMD_RANGE_START, true, "The range of date to start (inclusive).");
+		options.addOption(CMD_RANGE_END, true, "The range of date to end (inclusive)");
+		options.addOption(CMD_SLUGS, true, "The comma separated list of slugs to download");
 	}
 
 	// slug to title hashmap
 	private static final Map<String, String> SLUG_MAP = new LinkedHashMap<>();
 
 	// command line argument
-	private static final String COMMAND_LINE_ARG_DATE_FORMAT = "yyyyMMdd";
+	private static final String CMD_DATE_FORMAT = "yyyyMMdd";
 
-	private static final String PUZZLE_TYPE_DATE_DEFAULT = "date";
+	private static final String PUZZLE_TYPE_DATE_DEFAULT = CMD_DATE;
 	private static final String PUZZLE_TYPE_NUMBER = "number";
 
 	private static final String PUZZLR_JSON = "./puzzlr.json";
@@ -87,6 +92,7 @@ public class PuzzlrMain {
 
 
 	private static final String JSON_KEY_NAME = "name";
+	private static final String JSON_KEY_SLUG = "slug";
 	private static final String JSON_KEY_URL_FORMAT = "url_format";
 	private static final String JSON_KEY_EXTRACTOR = "extractor";
 	private static final String JSON_KEY_XSL = "xsl";
@@ -96,6 +102,7 @@ public class PuzzlrMain {
 
 	// all the XSLT variables that we are pumping into the template
 	private static final String XSLT_VARIABLE_PUZZLE_NAME = "puzzleName";
+	private static final String XSLT_VARIABLE_PUZZLE_SLUG = "puzzleSlug";
 	private static final String XSLT_VARIABLE_PUZZLE_NUMBER = "puzzleNumber";
 	private static final String XSLT_VARIABLE_PUZZLE_IDENTIFIER = "puzzleIdentifier";
 
@@ -103,37 +110,65 @@ public class PuzzlrMain {
 
 	private static List<String> GENERATED_FILES = new ArrayList<String>();
 
-	private static Date currentDate = null;
+	private static final Set<String> WANTED_SLUGS = new HashSet<>();
+
+	// the default command line arguments
+	private static String optionDate = null;
+	private static String optionRangeStart = null;
+	private static String optionRangeEnd = null;
+	private static String optionSlugs = null;
 
 	public static void main(String[] args) throws IOException, FOPException, TransformerException, ParseException, org.apache.commons.cli.ParseException {
 		FileUtils.forceMkdir(new File("./output/xml"));
 		FileUtils.forceMkdir(new File("./output/pdf"));
 
 		CommandLineParser parser = new DefaultParser();
-		CommandLine cmd = parser.parse( options, args);
+		CommandLine cmd = parser.parse(options, args);
+
+		// now extract the commands
+		parseAndValidateCommandLineArguments(cmd);
+
 		HelpFormatter formatter = new HelpFormatter();
-		formatter.printHelp( "puzzlr", options );
-
-		if(args.length != 0) {
-			String argZero = args[0];
-			LOGGER.info("Attempting to parse '{}' as a date. Date format is {}", argZero, COMMAND_LINE_ARG_DATE_FORMAT);
-			try {
-				currentDate  = new SimpleDateFormat(COMMAND_LINE_ARG_DATE_FORMAT).parse(argZero);
-			} catch(ParseException ex) {
-				LOGGER.error("Exception: {}. Exiting...", ex.getMessage());
-				System.exit(-1);
-			}
-
-		} else {
-			LOGGER.info("No date passed through the command line, using today's date.");
-			currentDate  = Calendar.getInstance().getTime();
-		}
+		formatter.printHelp("puzzlr", options);
 
 		String puzzlrJson = FileUtils.readFileToString(new File(PUZZLR_JSON), Charset.defaultCharset());
 		JSONObject puzzlrJsonObject = new JSONObject(puzzlrJson);
-
-
+		// now let us print out the slugs
 		Iterator<Object> puzzlesArrayIterator = puzzlrJsonObject.getJSONArray(JSON_KEY_PUZZLES).iterator();
+		while (puzzlesArrayIterator.hasNext()) {
+			JSONObject puzzleObject = (JSONObject) puzzlesArrayIterator.next();
+			String slug = puzzleObject.optString(JSON_KEY_SLUG, null);
+			String puzzleName = puzzleObject.getString(JSON_KEY_NAME);
+			LOGGER.info("Found slug '{}' for puzzle named '{}'", slug, puzzleName);
+		}
+
+
+		// at this point in time we are going to go through the range start and end
+		boolean shouldStop = false;
+
+		optionDate = optionRangeStart;
+		while(!shouldStop) {
+			generatePuzzles(puzzlrJsonObject);
+			if(optionRangeEnd.equals(optionDate)) {
+				shouldStop = true;
+			} else {
+				// increment defaultCommandDate
+				Date downloadDate = new SimpleDateFormat("yyyy-MM-dd").parse(optionDate);
+				Calendar instance = Calendar.getInstance();
+				instance.setTime(downloadDate);
+				instance.add(Calendar.DAY_OF_MONTH, 1);
+				optionDate = new SimpleDateFormat("yyyy-MM-dd").format(instance.getTime());
+			}
+		}
+
+		writeXmlFilesAndMerge();
+
+		mergeFiles();
+	}
+
+	private static void generatePuzzles(JSONObject puzzlrJsonObject) throws ParseException {
+		Iterator<Object> puzzlesArrayIterator;
+		puzzlesArrayIterator = puzzlrJsonObject.getJSONArray(JSON_KEY_PUZZLES).iterator();
 		while (puzzlesArrayIterator.hasNext()) {
 			Integer puzzleNumber = null;
 			JSONObject puzzleObject = (JSONObject) puzzlesArrayIterator.next();
@@ -143,30 +178,41 @@ public class PuzzlrMain {
 
 			if(puzzleType.equalsIgnoreCase(PUZZLE_TYPE_DATE_DEFAULT)) {
 				SimpleDateFormat simpleDateFormat = new SimpleDateFormat(urlFormat);
-				String formattedUrl = simpleDateFormat.format(currentDate );
+				new SimpleDateFormat("yyyy-MM-dd").parse(optionDate);
+				String formattedUrl = simpleDateFormat.format(new SimpleDateFormat("yyyy-MM-dd").parse(optionDate));
 
-				puzzles.add(
-						new Puzzle(
-								puzzleObject.getString(JSON_KEY_NAME), 
-								formattedUrl, 
-								puzzleObject.getString(JSON_KEY_EXTRACTOR),
-								puzzleObject.getString(JSON_KEY_XSL),
-								puzzleType
-								)
+				// if the wanted slugs set is empty - we want all, if not empty, only those slugs
+
+				Puzzle puzzle = new Puzzle(
+						puzzleObject.getString(JSON_KEY_NAME), 
+						puzzleObject.getString(JSON_KEY_SLUG),
+						optionDate,
+						formattedUrl, 
+						puzzleObject.getString(JSON_KEY_EXTRACTOR),
+						puzzleObject.getString(JSON_KEY_XSL),
+						puzzleType,
+						optionDate,
+						"-1"
 						);
+				if(WANTED_SLUGS.isEmpty() || WANTED_SLUGS.contains(puzzle.getSlug())) {
+					puzzles.add(puzzle);
+				}
+
 			} else if(puzzleType.equalsIgnoreCase(PUZZLE_TYPE_NUMBER)){
 				// add a numeric format now
 				String translateDate = puzzleObject.getString(JSON_KEY_TRANSLATE_DATE);
 				String translateNumber = puzzleObject.getString(JSON_KEY_TRANSLATE_NUMBER);
-				Date dateTranslate = new SimpleDateFormat(COMMAND_LINE_ARG_DATE_FORMAT).parse(translateDate);
+				Date dateTranslate = new SimpleDateFormat(CMD_DATE_FORMAT).parse(translateDate);
 
-				int numDaysDifference = (int)((currentDate .getTime() - dateTranslate.getTime()) / (1000 * 60 * 60 * 24) );
+				int numDaysDifference = (int)((new SimpleDateFormat("yyyy-MM-dd").parse(optionDate).getTime() - dateTranslate.getTime()) / (1000 * 60 * 60 * 24) );
 				int parseInt = Integer.parseInt(translateNumber);
 
 				puzzleNumber = parseInt + numDaysDifference;
 				String formattedUrl = String.format(urlFormat, puzzleNumber);
 				Puzzle puzzle = new Puzzle(
 						puzzleObject.getString(JSON_KEY_NAME), 
+						puzzleObject.getString(JSON_KEY_SLUG),
+						optionDate,
 						formattedUrl, 
 						puzzleObject.getString(JSON_KEY_EXTRACTOR),
 						puzzleObject.getString(JSON_KEY_XSL),
@@ -175,9 +221,11 @@ public class PuzzlrMain {
 						translateNumber
 						);
 				puzzle.setPuzzleNumber(puzzleNumber);
-				puzzles.add(
-						puzzle
-						);
+
+				// if the wanted slugs set is empty - we want all, if not empty, only those slugs
+				if(WANTED_SLUGS.isEmpty() || WANTED_SLUGS.contains(puzzle.getSlug())) {
+					puzzles.add(puzzle);
+				}
 			} else {
 				LOGGER.error("Unknown puzzle type of '{}'", puzzleType);
 			}
@@ -199,10 +247,47 @@ public class PuzzlrMain {
 			LOGGER.error("Found duplicate urls for puzzles, exiting...");
 			System.exit(-1);
 		}
+	}
 
-		writeXmlFilesAndMerge();
+	private static void parseAndValidateCommandLineArguments(CommandLine cmd) {
+		optionDate = cmd.getOptionValue(CMD_DATE, new SimpleDateFormat("yyyy-MM-dd").format(new Date(System.currentTimeMillis())));
+		optionRangeStart = cmd.getOptionValue(CMD_RANGE_START, null);
+		optionRangeEnd = cmd.getOptionValue(CMD_RANGE_END, null);
+		optionSlugs = cmd.getOptionValue(CMD_SLUGS, null);
 
-		mergeFiles();
+		if(null != optionSlugs) {
+			String[] splits = optionSlugs.split(",");
+			for (String string : splits) {
+				WANTED_SLUGS.add(string);
+			}
+		}
+
+		// now check for the range start and end
+		if(null == optionRangeStart) {
+			optionRangeStart = optionDate;
+		}
+
+		if(null == optionRangeEnd) {
+			optionRangeEnd = optionDate;
+		}
+
+		System.out.println("Parsed and calculated parameter '" + CMD_DATE + "' of '" + optionDate + "'.");
+		System.out.println("Parsed and calculated parameter '" + CMD_RANGE_START + "' of '" + optionRangeEnd + "'.");
+		System.out.println("Parsed and calculated parameter '" + CMD_RANGE_END + "' of '" + optionRangeStart + "'.");
+		System.out.println("Parsed and calculated parameter '" + CMD_SLUGS + "' of '" + optionSlugs + "'.");
+
+		// finally - if optionRangeEnd is less than optionRangeStart, then just exit
+		try {
+			Date end = new SimpleDateFormat("yyyy-MM-dd").parse(optionRangeEnd);
+			Date start = new SimpleDateFormat("yyyy-MM-dd").parse(optionRangeStart);
+			if(end.before(start)) {
+				LOGGER.error("End date is before start date");
+				System.exit(-1);
+			}
+		} catch (ParseException e) {
+			LOGGER.error("Could not parse the options");
+			System.exit(-1);
+		}
 	}
 
 	/**
@@ -212,7 +297,7 @@ public class PuzzlrMain {
 	 */
 	private static void writeXmlFilesAndMerge() throws IOException {
 		for (Puzzle puzzle : puzzles) {
-			String xmlFileName = "./output/xml/" + puzzle.getFileName()  + new SimpleDateFormat("yyyy-MM-dd").format(currentDate ) + ".xml";
+			String xmlFileName = "./output/xml/" + puzzle.getFileName()  + puzzle.getDate() + ".xml";
 			File xmlFile = new File(xmlFileName);
 			if(!xmlFile.exists()) {
 				LOGGER.info("Downloading file '{}'", xmlFileName);
@@ -242,7 +327,7 @@ public class PuzzlrMain {
 			LOGGER.error("Puzzle '{}' for '{}' is marked as not correct, ignoring...", puzzle.getName(), puzzle.getFileName());
 			return;
 		}
-		String pdfFile = "./output/pdf/" + puzzle.getFileName() + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".pdf";
+		String pdfFile = "./output/pdf/" + puzzle.getFileName() + puzzle.getDate() + ".pdf";
 
 		LOGGER.info("Converting file '{}' to '{}', with xsl '{}'", xmlFile.getName(), pdfFile, puzzle.getXsl());
 
@@ -257,7 +342,6 @@ public class PuzzlrMain {
 		try {
 			out = new java.io.FileOutputStream(pdfFile);
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -271,7 +355,8 @@ public class PuzzlrMain {
 
 			Transformer transformer = factory.newTransformer(new StreamSource(resourceAsStream));
 			transformer.setParameter(XSLT_VARIABLE_PUZZLE_NAME, puzzle.getName());
-			transformer.setParameter(XSLT_VARIABLE_PUZZLE_IDENTIFIER, new SimpleDateFormat("dd MMMM yyyy").format(currentDate));
+			transformer.setParameter(XSLT_VARIABLE_PUZZLE_SLUG, puzzle.getSlug());
+			transformer.setParameter(XSLT_VARIABLE_PUZZLE_IDENTIFIER, puzzle.getDate());
 			if(null != number) {
 				transformer.setParameter(XSLT_VARIABLE_PUZZLE_NUMBER, number);
 			} else {
@@ -308,7 +393,13 @@ public class PuzzlrMain {
 		// now merge the files
 		if(GENERATED_FILES.size() != 0) {
 			PDFMergerUtility pdfMergerUtility= new PDFMergerUtility();
-			String destinationPdf = "./output/pdf/" + new SimpleDateFormat("yyyy-MM-dd").format(currentDate) + ".pdf";
+			String destinationPdf = null;
+			if(optionRangeEnd.equals(optionRangeStart)) {
+				destinationPdf = "./output/pdf/" + optionDate + ".pdf";
+			} else {
+				destinationPdf = "./output/pdf/" + optionRangeStart + "-to-" + optionRangeEnd + ".pdf";
+			}
+
 			pdfMergerUtility.setDestinationFileName(destinationPdf);
 			for (String generatedFile : GENERATED_FILES) {
 				pdfMergerUtility.addSource(generatedFile);
