@@ -49,7 +49,7 @@ public class PuzzlrMain {
 	private static final SimpleDateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
 	// slug to title hashmap
-	private static final Map<String, String> SLUG_MAP = new LinkedHashMap<>();
+	public static final Map<String, String> SLUG_MAP = new LinkedHashMap<>();
 
 	// command line argument
 	private static final String CMD_DATE_FORMAT = "yyyyMMdd";
@@ -71,16 +71,17 @@ public class PuzzlrMain {
 	private static final String JSON_KEY_TRANSLATE_DATE = "translateDate";
 	private static final String JSON_KEY_TRANSLATE_NUMBER = "translateNumber";
 
-	private static List<Puzzle> puzzles = new ArrayList<Puzzle>();
+	public static List<Puzzle> puzzles = new ArrayList<Puzzle>();
 
-	private static List<String> GENERATED_FILES = new ArrayList<String>();
+	public static List<String> GENERATED_FILES = new ArrayList<String>();
 
+	private static JSONObject puzzlrJsonObject = null;
 
 	// the default command line arguments
-	public static String optionDate = null;
-	public static String optionRangeStart = null;
-	public static String optionRangeEnd = null;
-	public static String optionSlugs = null;
+	public static String optionDate = SIMPLE_DATE_FORMAT.format(new Date(System.currentTimeMillis()));
+	public static String optionRangeStart = SIMPLE_DATE_FORMAT.format(new Date(System.currentTimeMillis()));
+	public static String optionRangeEnd = SIMPLE_DATE_FORMAT.format(new Date(System.currentTimeMillis()));
+	public static String optionSlugs = "";
 	public static final Set<String> WANTED_SLUGS = new HashSet<>();
 
 	
@@ -90,27 +91,12 @@ public class PuzzlrMain {
 
 		new CommandParserHelper(args);
 
-		String puzzlrJson = FileUtils.readFileToString(new File(PUZZLR_JSON), Charset.defaultCharset());
-		JSONObject puzzlrJsonObject = new JSONObject(puzzlrJson);
-		// now let us print out the slugs
-		Iterator<Object> puzzlesArrayIterator = puzzlrJsonObject.getJSONArray(JSON_KEY_PUZZLES).iterator();
-		while (puzzlesArrayIterator.hasNext()) {
-			JSONObject puzzleObject = (JSONObject) puzzlesArrayIterator.next();
-			String slug = puzzleObject.optString(JSON_KEY_SLUG, null);
-			String puzzleName = puzzleObject.getString(JSON_KEY_NAME);
-			if(null == slug) {
-				LOGGER.warn("No slug found for puzzle named '{}', you WILL NOT be able to reference this puzzle", puzzleName);
-			} else {
-				LOGGER.info("Found slug '{}' for puzzle named '{}'", slug, puzzleName);
-				if(SLUG_MAP.containsKey(slug)) {
-					LOGGER.error("Slug '{}' already exists for puzzle named '{}', so the puzzle named '{}' will be ignored.", slug, SLUG_MAP.get(slug), puzzleName);
-				} else {
-					SLUG_MAP.put(slug, puzzleName);
-				}
-			}
-		}
+		parsePuzzlrJSON();
 
+		generatePDFs();
+	}
 
+	public static void generatePDFs() throws ParseException, IOException {
 		// at this point in time we are going to go through the range start and end
 		boolean shouldStop = false;
 
@@ -132,6 +118,28 @@ public class PuzzlrMain {
 		writeXmlFilesAndMerge();
 
 		PDFHelper.mergeFiles(GENERATED_FILES, optionRangeStart, optionRangeEnd);
+	}
+
+	public static void parsePuzzlrJSON() throws IOException {
+		String puzzlrJson = FileUtils.readFileToString(new File(PUZZLR_JSON), Charset.defaultCharset());
+		puzzlrJsonObject = new JSONObject(puzzlrJson);
+		// now let us print out the slugs
+		Iterator<Object> puzzlesArrayIterator = puzzlrJsonObject.getJSONArray(JSON_KEY_PUZZLES).iterator();
+		while (puzzlesArrayIterator.hasNext()) {
+			JSONObject puzzleObject = (JSONObject) puzzlesArrayIterator.next();
+			String slug = puzzleObject.optString(JSON_KEY_SLUG, null);
+			String puzzleName = puzzleObject.getString(JSON_KEY_NAME);
+			if(null == slug) {
+				LOGGER.warn("No slug found for puzzle named '{}', you WILL NOT be able to reference this puzzle", puzzleName);
+			} else {
+				LOGGER.info("Found slug '{}' for puzzle named '{}'", slug, puzzleName);
+				if(SLUG_MAP.containsKey(slug)) {
+					LOGGER.error("Slug '{}' already exists for puzzle named '{}', so the puzzle named '{}' will be ignored.", slug, SLUG_MAP.get(slug), puzzleName);
+				} else {
+					SLUG_MAP.put(slug, puzzleName);
+				}
+			}
+		}
 	}
 
 	private static void generatePuzzles(JSONObject puzzlrJsonObject) throws ParseException {
@@ -224,7 +232,7 @@ public class PuzzlrMain {
 	 */
 	private static void writeXmlFilesAndMerge() throws IOException {
 		for (Puzzle puzzle : puzzles) {
-			String xmlFileName = Constants.DIR_OUTPUT_XML + puzzle.getFileName()  + puzzle.getDate() + ".xml";
+			String xmlFileName = Constants.DIR_OUTPUT_XML + puzzle.getFileName() + puzzle.getDate() + ".xml";
 			File xmlFile = new File(xmlFileName);
 			if(!xmlFile.exists()) {
 				LOGGER.info("Downloading file '{}'", xmlFileName);

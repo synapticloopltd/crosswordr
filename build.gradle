@@ -4,6 +4,7 @@ plugins {
 	id 'eclipse'
 	id "maven"
 	id "maven-publish"
+
 	id "com.jfrog.bintray" version "1.8.4"
 	id 'co.riiid.gradle' version '0.4.2'
 
@@ -24,9 +25,12 @@ sourceCompatibility = 1.11
 targetCompatibility = 1.11
 
 repositories {
-	mavenLocal()
 	mavenCentral()
 	jcenter()
+	mavenLocal()
+	flatDir {
+		dirs '../aa-libs/'
+	}
 }
 
 dependencies {
@@ -41,6 +45,7 @@ dependencies {
 	implementation 'org.apache.pdfbox:pdfbox:2.0.16'
 	implementation 'org.jsoup:jsoup:1.13.1'
 	implementation 'commons-cli:commons-cli:1.4'
+	implementation files('../aa-libs/synapticlooptools-0.0.1.jar')
 
 	testImplementation 'junit:junit:4.12'
 }

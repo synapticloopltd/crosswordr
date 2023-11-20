@@ -73,6 +73,11 @@ public class PDFHelper {
 			return(null);
 		}
 		String pdfFile = "./output/pdf/" + puzzle.getFileName() + puzzle.getDate() + ".pdf";
+		File testFile = new File(pdfFile);
+		if(testFile.exists()) {
+			LOGGER.info("File exists, not re-generating the pdf for '{}'.", pdfFile);
+			return(pdfFile);
+		}
 
 		LOGGER.info("Converting file '{}' to '{}', with xsl '{}'", xmlFile.getName(), pdfFile, puzzle.getXsl());
 
